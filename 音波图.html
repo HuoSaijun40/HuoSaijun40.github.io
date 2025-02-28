@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=yes">
+  <title>动态音波图视频录制</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 50px;
+      background-color: #f5f5f5;
+    }
+
+    canvas {
+      border: 1px solid #000;
+      margin-top: 20px;
+      width: 100%;
+      height: 300px;
+      background-color: #fff;
+      border-radius: 15px; /* 画布圆角 */
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap; /* 允许按钮换行 */
+    }
+
+    .controls button {
+      font-size: 16px;
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 25px; /* 按钮圆角 */
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .controls button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .controls button:hover:not(:disabled) {
+      background-color: #45a049;
+    }
+
+    .color-selector {
+      margin-top: 20px;
+    }
+
+    .color-selector label {
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    .color-selector select {
+      font-size: 16px;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    .image-upload {
+      margin-top: 20px;
+    }
+
+    /* 毛玻璃效果开关样式 */
+    .blur-toggle {
+      margin-top: 20px;
+    }
+
+    .blur-toggle label {
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    .blur-toggle input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    /* 样式切换选项 */
+    .style-toggle {
+      margin-top: 20px;
+    }
+
+    .style-toggle label {
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    .style-toggle select {
+      font-size: 16px;
+      padding: 5px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-container">
+    <h1>动态音波图视频录制</h1>
+    <input type="file" id="audioFile" accept="audio/*">
+    <div class="controls">
+      <button id="playButton" disabled>播放</button>
+      <button id="pauseButton" disabled>暂停</button>
+      <button id="startRecordButton" disabled>开始录制</button>
+      <button id="stopRecordButton" disabled>停止录制</button>
+    </div>
+    <div class="color-selector">
+      <label for="colorSelect">选择音波条颜色:</label>
+      <select id="colorSelect">
+        <option value="red">红色</option>
+        <option value="cyan">青色</option>
+        <option value="blue">蓝色</option>
+        <option value="pink">粉色</option>
+        <option value="green">绿色</option>
+        <option value="white">白色</option>
+        <option value="gray">灰色</option>
+        <option value="lime">极光绿</option> <!-- 添加极光绿 -->
+      </select>
+    </div>
+    <div class="style-toggle">
+      <label for="styleSelect">选择样式:</label>
+      <select id="styleSelect">
+        <option value="bar">柱状图</option>
+        <option value="line">折线图</option>
+      </select>
+    </div>
+    <div class="image-upload">
+      <label for="imageFile">上传背景图片:</label>
+      <input type="file" id="imageFile" accept="image/*">
+    </div>
+    <div class="blur-toggle">
+      <label for="blurEffect">启用毛玻璃效果:</label>
+      <input type="checkbox" id="blurEffect">
+    </div>
+    <canvas id="waveform" width="800" height="400"></canvas>
+  </div>
+  <script>
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const canvas = document.getElementById('waveform');
+    const ctx = canvas.getContext('2d');
+    let audioSource, analyser, audioBuffer;
+    let mediaRecorder, recordedChunks = [];
+    let audioPlaying = false; // 标记音频是否正在播放
+    let barColor = 'red'; // 默认音波条颜色
+    let backgroundImage = null; // 背景图片
+    let blurEnabled = false; // 是否启用毛玻璃效果
+    let currentStyle = 'bar'; // 默认样式为柱状图
+
+    // 记录每个音波条的最大高度
+    let maxHeights = new Array(256).fill(0); // analyser.fftSize / 2
+
+    // 平滑数据函数
+    function smoothData(dataArray, bufferLength) {
+      const smoothingFactor = 0.8; // 平滑系数，值越大越平滑
+      let smoothedArray = new Uint8Array(bufferLength);
+
+      for (let i = 0; i < bufferLength; i++) {
+        smoothedArray[i] = dataArray[i] * smoothingFactor + (1 - smoothingFactor) * (smoothedArray[i] || 0);
+      }
+
+      return smoothedArray;
+    }
+
+    // 文件选择
+    document.getElementById('audioFile').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        if (!file.type.startsWith('audio/')) {
+          alert('请上传音频文件');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const arrayBuffer = e.target.result;
+          audioContext.decodeAudioData(arrayBuffer, function (buffer) {
+            audioBuffer = buffer; // 保存音频数据
+            setupAudio();
+          }, function (error) {
+            console.error('音频解码失败:', error);
+            alert('音频文件解码失败，请检查文件格式');
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    });
+
+    // 颜色选择
+    document.getElementById('colorSelect').addEventListener('change', function (event) {
+      barColor = event.target.value; // 更新音波条颜色
+    });
+
+    // 样式选择
+    document.getElementById('styleSelect').addEventListener('change', function (event) {
+      currentStyle = event.target.value; // 更新样式
+    });
+
+    // 图片上传
+    document.getElementById('imageFile').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        if (!file.type.startsWith('image/')) {
+          alert('请上传图片文件');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            backgroundImage = img; // 保存背景图片
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // 毛玻璃效果开关
+    document.getElementById('blurEffect').addEventListener('change', function (event) {
+      blurEnabled = event.target.checked; // 更新毛玻璃效果状态
+    });
+
+    // 设置音频
+    function setupAudio() {
+      // 启用按钮
+      document.getElementById('playButton').disabled = false;
+      document.getElementById('pauseButton').disabled = false;
+      document.getElementById('startRecordButton').disabled = false;
+
+      // 创建分析器
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256; // 设置频谱分析的分辨率
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      // 播放音频
+      document.getElementById('playButton').onclick = function () {
+        if (audioSource) {
+          audioSource.stop(); // 停止之前的音频源
+          audioSource.disconnect();
+        }
+        audioSource = audioContext.createBufferSource();
+        audioSource.buffer = audioBuffer;
+        audioSource.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        audioSource.start(0); // 从头开始播放
+        audioPlaying = true;
+
+        // 绘制音波图
+        drawWaveform(dataArray, bufferLength);
+
+        // 监听音频播放结束事件
+        audioSource.onended = function () {
+          audioPlaying = false; // 停止播放
+        };
+      };
+
+      // 暂停音频
+      document.getElementById('pauseButton').onclick = function () {
+        if (audioSource) {
+          audioSource.stop(); // 停止音频
+          audioPlaying = false;
+        }
+      };
+
+      // 开始录制
+      document.getElementById('startRecordButton').onclick = function () {
+        startRecording();
+      };
+
+      // 停止录制
+      document.getElementById('stopRecordButton').onclick = function () {
+        stopRecording();
+      };
+    }
+
+    // 绘制动态音波图
+    function drawWaveform(dataArray, bufferLength) {
+      analyser.getByteFrequencyData(dataArray); // 获取频谱数据
+      const smoothedData = smoothData(dataArray, bufferLength); // 平滑数据
+
+      // 清空画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 如果有背景图片，绘制背景图片
+      if (backgroundImage) {
+        // 如果启用毛玻璃效果，先绘制模糊的背景
+        if (blurEnabled) {
+          ctx.filter = 'blur(5px)'; // 设置模糊效果（调整为5px，更轻的模糊）
+        } else {
+          ctx.filter = 'none'; // 清除模糊效果
+        }
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        ctx.filter = 'none'; // 重置模糊效果
+      } else {
+        // 如果没有背景图片，使用默认背景颜色
+        ctx.fillStyle = 'rgb(200, 200, 200)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // 根据选择的样式绘制音波图
+      if (currentStyle === 'bar') {
+        drawBarWaveform(smoothedData, bufferLength); // 使用平滑后的数据
+      } else if (currentStyle === 'line') {
+        drawLineWaveform(smoothedData, bufferLength); // 使用平滑后的数据
+      }
+
+      // 循环绘制
+      requestAnimationFrame(() => drawWaveform(dataArray, bufferLength));
+    }
+
+    // 绘制柱状图
+    function drawBarWaveform(dataArray, bufferLength) {
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        // 放大音波条的高度
+        barHeight = (dataArray[i] / 2) * 1.5; // 放大系数为1.5
+
+        // 更新最大高度
+        if (barHeight > maxHeights[i]) {
+          maxHeights[i] = barHeight;
+        } else {
+          // 减慢下降速度，速度调整为每次减少 0.05
+          maxHeights[i] = Math.max(maxHeights[i] - 0.05, barHeight);
+        }
+
+        // 根据选择的颜色绘制音波条
+        ctx.fillStyle = barColor;
+        ctx.beginPath();
+
+        // 从底部左侧开始
+        ctx.moveTo(x, canvas.height); // 底部左侧起点
+        ctx.lineTo(x, canvas.height - barHeight + barWidth / 2); // 画左侧直线，留出顶部半圆空间
+
+        // 绘制顶部半圆
+        ctx.arc(
+          x + barWidth / 2, // 半圆中心 x 坐标
+          canvas.height - barHeight + barWidth / 2, // 半圆中心 y 坐标
+          barWidth / 2, // 半圆半径
+          Math.PI, // 起始角度（180度）
+          0, // 结束角度（0度）
+          false // 顺时针方向
+        );
+
+        // 画右侧直线
+        ctx.lineTo(x + barWidth, canvas.height);
+
+        ctx.closePath(); // 闭合路径
+        ctx.fill();
+
+        // 绘制线
+        ctx.strokeStyle = 'rgb(0, 0, 0)';
+        ctx.beginPath();
+        ctx.moveTo(x, canvas.height - maxHeights[i]);
+        ctx.lineTo(x + barWidth, canvas.height - maxHeights[i]);
+        ctx.stroke();
+
+        x += barWidth + 1;
+      }
+    }
+
+    // 绘制折线图
+    function drawLineWaveform(dataArray, bufferLength) {
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
+
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height); // 从画布底部开始
+
+      // 设置发光效果
+      ctx.shadowBlur = 10; // 发光模糊半径
+      ctx.shadowColor = barColor; // 发光颜色与折线颜色一致
+
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] / 2) * 1.5; // 放大系数为1.5
+
+        // 更新最大高度
+        if (barHeight > maxHeights[i]) {
+          maxHeights[i] = barHeight;
+        } else {
+          // 减慢下降速度，速度调整为每次减少 0.05
+          maxHeights[i] = Math.max(maxHeights[i] - 0.05, barHeight);
+        }
+
+        // 绘制折线
+        ctx.lineTo(x, canvas.height - barHeight); // 从底部向上浮动
+        x += barWidth + 1;
+      }
+
+      ctx.strokeStyle = barColor; // 使用选择的颜色
+      ctx.lineWidth = 2; // 设置线条宽度
+      ctx.stroke(); // 绘制线条
+
+      // 清除发光效果
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+    }
+
+    // 开始录制
+    function startRecording() {
+      recordedChunks = []; // 清空之前的录制数据
+      const stream = canvas.captureStream(120); // 将帧率提高到 120 FPS
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/mp4' // 修改为MP4格式
+      });
+
+      // 监听数据可用事件
+      mediaRecorder.ondataavailable = function (event) {
+        if (event.data.size > 0) {
+          recordedChunks.push(event.data); // 保存录制的数据块
+        }
+      };
+
+      // 监听录制结束事件
+      mediaRecorder.onstop = function () {
+        const blob = new Blob(recordedChunks, { type: 'video/mp4' }); // 创建MP4文件
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = '音波图视频.mp4'; // 修改文件名为MP4格式
+        document.body.appendChild(a);
+        a.click(); // 触发下载
+        URL.revokeObjectURL(url); // 释放URL对象
+      };
+
+      mediaRecorder.start(); // 开始录制
+      document.getElementById('startRecordButton').disabled = true;
+      document.getElementById('stopRecordButton').disabled = false;
+    }
+
+    // 停止录制
+    function stopRecording() {
+      mediaRecorder.stop(); // 停止录制
+      document.getElementById('startRecordButton').disabled = false;
+      document.getElementById('stopRecordButton').disabled = true;
+    }
+  </script>
+</body>
+
+</html>
