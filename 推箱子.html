@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推箱子</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(8, 40px); /* 横向8格，每格40px */
+            grid-template-rows: repeat(8, 40px);   /* 纵向8格，每格40px */
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px; /* 调整字体大小 */
+        }
+        .player {
+            background-color: #ffcc00;
+        }
+        .box {
+            background-color: #ff6666;
+        }
+        .target {
+            background-color: #66cc66;
+        }
+        .box-on-target {
+            background-color: #66cc66;
+        }
+        .controls {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left down right";
+            gap: 10px;
+        }
+        .controls button {
+            width: 50px; /* 调整按钮大小 */
+            height: 50px;
+            font-size: 20px; /* 调整字体大小 */
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .controls button:active {
+            background-color: #555;
+        }
+        .controls .up {
+            grid-area: up;
+        }
+        .controls .left {
+            grid-area: left;
+        }
+        .controls .down {
+            grid-area: down;
+        }
+        .controls .right {
+            grid-area: right;
+        }
+
+        /* 媒体查询，适配小屏幕 */
+        @media (max-width: 600px) {
+            .game-container {
+                grid-template-columns: repeat(8, 30px); /* 横向8格，每格30px */
+                grid-template-rows: repeat(8, 30px);   /* 纵向8格，每格30px */
+            }
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 16px; /* 调整字体大小 */
+            }
+            .controls button {
+                width: 40px; /* 调整按钮大小 */
+                height: 40px;
+                font-size: 16px; /* 调整字体大小 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="game-container">
+        <!-- 游戏地图将通过JavaScript动态生成 -->
+    </div>
+    <div class="controls">
+        <button class="up" onclick="movePlayer(0, -1)">↑</button>
+        <button class="left" onclick="movePlayer(-1, 0)">←</button>
+        <button class="down" onclick="movePlayer(0, 1)">↓</button>
+        <button class="right" onclick="movePlayer(1, 0)">→</button>
+    </div>
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        let map = [];
+        let player = { x: 0, y: 0 };
+        let boxes = [];
+        let targets = [];
+
+        // 初始化游戏
+        function initGame() {
+            generateRandomMap();
+            renderMap();
+        }
+
+        // 随机生成地图
+        function generateRandomMap() {
+            map = Array.from({ length: 8 }, () => Array(8).fill(0)); // 8×8 地图
+            boxes = [];
+            targets = [];
+
+            // 随机生成障碍物，最多6个
+            let obstacleCount = 0;
+            while (obstacleCount < 6) {
+                const x = Math.floor(Math.random() * 6) + 1; // 横向范围1-6
+                const y = Math.floor(Math.random() * 6) + 1; // 纵向范围1-6
+                if (map[y][x] === 0) {
+                    map[y][x] = 1; // 1 表示障碍物
+                    obstacleCount++;
+                }
+            }
+
+            // 随机生成玩家位置
+            player.x = Math.floor(Math.random() * 6) + 1; // 横向范围1-6
+            player.y = Math.floor(Math.random() * 6) + 1; // 纵向范围1-6
+            map[player.y][player.x] = 0; // 确保玩家位置没有障碍物
+
+            // 随机生成目标位置
+            const numBoxes = 3; // 每关3个箱子
+            for (let i = 0; i < numBoxes; i++) {
+                let targetX, targetY;
+                do {
+                    targetX = Math.floor(Math.random() * 6) + 1; // 横向范围1-6
+                    targetY = Math.floor(Math.random() * 6) + 1; // 纵向范围1-6
+                } while (map[targetY][targetX] !== 0 || (targetX === player.x && targetY === player.y) || isPositionOccupied(targetX, targetY, targets) || isTargetBlocked(targetX, targetY));
+                targets.push({ x: targetX, y: targetY });
+            }
+
+            // 随机生成箱子位置
+            for (let i = 0; i < numBoxes; i++) {
+                let boxX, boxY;
+                do {
+                    boxX = Math.floor(Math.random() * 6) + 1; // 横向范围1-6
+                    boxY = Math.floor(Math.random() * 6) + 1; // 纵向范围1-6
+                } while (map[boxY][boxX] !== 0 || (boxX === player.x && boxY === player.y) || isBoxSurrounded(boxX, boxY) || isBoxOnTarget(boxX, boxY) || isBoxTwoSidesBlocked(boxX, boxY) || isPositionOccupied(boxX, boxY, boxes));
+                boxes.push({ x: boxX, y: boxY });
+            }
+        }
+
+        // 检查位置是否被占用
+        function isPositionOccupied(x, y, positions) {
+            return positions.some(pos => pos.x === x && pos.y === y);
+        }
+
+        // 检查目标点是否被障碍物包围（最多允许一面障碍物）
+        function isTargetBlocked(x, y) {
+            const directions = [
+                { dx: -1, dy: 0 }, // 左
+                { dx: 1, dy: 0 },  // 右
+                { dx: 0, dy: -1 },  // 上
+                { dx: 0, dy: 1 }    // 下
+            ];
+            let count = 0;
+            for (const dir of directions) {
+                const newX = x + dir.dx;
+                const newY = y + dir.dy;
+                if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1) {
+                    count++;
+                }
+            }
+            return count > 1; // 如果超过一面有障碍物，返回 true
+        }
+
+        // 检查箱子的三面是否有障碍物或箱子
+        function isBoxSurrounded(x, y) {
+            const directions = [
+                { dx: -1, dy: 0 }, // 左
+                { dx: 1, dy: 0 },  // 右
+                { dx: 0, dy: -1 },  // 上
+                { dx: 0, dy: 1 }    // 下
+            ];
+            let count = 0;
+            for (const dir of directions) {
+                const newX = x + dir.dx;
+                const newY = y + dir.dy;
+                if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1 || boxes.some(box => box.x === newX && box.y === newY)) {
+                    count++;
+                }
+            }
+            return count >= 3; // 如果三面或四面有障碍物或箱子，返回 true
+        }
+
+        // 检查箱子是否生成在目标点上
+        function isBoxOnTarget(x, y) {
+            return targets.some(target => target.x === x && target.y === y);
+        }
+
+        // 检查箱子的两面是否有障碍物
+        function isBoxTwoSidesBlocked(x, y) {
+            const directions = [
+                { dx: -1, dy: 0 }, // 左
+                { dx: 1, dy: 0 },  // 右
+                { dx: 0, dy: -1 },  // 上
+                { dx: 0, dy: 1 }    // 下
+            ];
+            let count = 0;
+            for (const dir of directions) {
+                const newX = x + dir.dx;
+                const newY = y + dir.dy;
+                if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1) {
+                    count++;
+                }
+            }
+            return count >= 2; // 如果两面或更多有障碍物，返回 true
+        }
+
+        // 渲染地图
+        function renderMap() {
+            gameContainer.innerHTML = '';
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+
+                    if (map[y][x] === 1) {
+                        cell.style.backgroundColor = '#333'; // 障碍物
+                    }
+
+                    if (player.x === x && player.y === y) {
+                        cell.classList.add('player');
+                        cell.textContent = 'P';
+                    }
+
+                    boxes.forEach(box => {
+                        if (box.x === x && box.y === y) {
+                            cell.classList.add('box');
+                            cell.textContent = 'B';
+                        }
+                    });
+
+                    targets.forEach(target => {
+                        if (target.x === x && target.y === y) {
+                            cell.classList.add('target');
+                        }
+                    });
+
+                    gameContainer.appendChild(cell);
+                }
+            }
+        }
+
+        // 检查是否胜利
+        function checkWin() {
+            return boxes.every(box => targets.some(target => target.x === box.x && target.y === box.y));
+        }
+
+        // 移动玩家
+        function movePlayer(dx, dy) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+
+            if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1) {
+                return;
+            }
+
+            const boxIndex = boxes.findIndex(box => box.x === newX && box.y === newY);
+            if (boxIndex !== -1) {
+                const newBoxX = newX + dx;
+                const newBoxY = newY + dy;
+
+                if (newBoxX < 0 || newBoxX >= 8 || newBoxY < 0 || newBoxY >= 8 || map[newBoxY][newBoxX] === 1) {
+                    return;
+                }
+
+                if (boxes.some(box => box.x === newBoxX && box.y === newBoxY)) {
+                    return;
+                }
+
+                boxes[boxIndex].x = newBoxX;
+                boxes[boxIndex].y = newBoxY;
+            }
+
+            player.x = newX;
+            player.y = newY;
+
+            renderMap();
+
+            if (checkWin()) {
+                alert('恭喜你，胜利了！进入下一关！');
+                initGame(); // 进入下一关
+            }
+        }
+
+        // 初始化游戏
+        initGame();
+    </script>
+</body>
+</html>
