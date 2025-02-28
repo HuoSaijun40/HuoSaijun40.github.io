@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字数计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f9f9f9;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            resize: vertical;
+            background-color: #fff;
+            transition: border-color 0.3s ease;
+        }
+        textarea:focus {
+            border-color: #66afe9;
+            outline: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #66afe9;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #5599cc;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #e9f5ff;
+            border-radius: 10px;
+            border: 2px solid #66afe9;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>字数计算器</h1>
+    <textarea id="textInput" placeholder="在此处输入或粘贴文字..."></textarea>
+    <button onclick="countWords()">计算</button>
+    <div id="result"></div>
+
+    <script>
+        function countWords() {
+            // 获取文本区域的内容
+            var text = document.getElementById("textInput").value;
+
+            // 计算字数（包括标点符号和英文字母）
+            var wordCount = text.length;
+
+            // 显示结果
+            document.getElementById("result").innerText = "字数: " + wordCount;
+        }
+    </script>
+
+</body>
+</html>
