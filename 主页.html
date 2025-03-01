@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HuoSaijun40的主页</title>
+    <style>
+        /* 通用样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header-image {
+            width: 100%;
+            height: 150px;
+            background-image: url('https://HuoSaijun40.github.io/20250228_23560333.png');
+            background-size: cover;
+            background-position: center;
+            filter: blur(2px);
+            position: relative;
+        }
+        .header-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 1;
+        }
+        .header-image img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .button {
+            margin: 8px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            width: auto; /* 按钮宽度根据内容自适应 */
+            text-align: center;
+            white-space: nowrap; /* 防止文本换行 */
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .category {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* 响应式布局 */
+        @media (min-width: 768px) {
+            .header-image { height: 200px; }
+            .button { 
+                margin: 10px;
+                border-radius: 8px;
+            }
+            .category { font-size: 20px; }
+        }
+
+        @media (max-width: 767px) {
+            .header-image { height: 120px; }
+            .button {
+                font-size: 14px;
+                border-radius: 25px;
+                padding: 10px 20px;
+                margin: 8px 0;
+                width: auto; /* 手机端按钮宽度根据内容自适应 */
+            }
+            .category { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-image">
+        <img src="https://HuoSaijun40.github.io/20250228_23560333.png" alt="Header Image">
+    </div>
+
+    <!-- 修改按钮文本为“抖音主页” -->
+    <a href="https://v.douyin.com/i5rctpRY/" class="button" target="_blank">抖音主页</a>
+
+    <!-- 小游戏 -->
+    <div class="category">小游戏</div>
+    <a href="https://HuoSaijun40.github.io/推箱子.html" class="button" target="_blank">推箱子</a>
+    <a href="https://HuoSaijun40.github.io/贪吃蛇.html" class="button" target="_blank">贪吃蛇</a>
+
+    <!-- 自己做的小玩意 -->
+    <div class="category">自己做的小玩意</div>
+    <a href="https://HuoSaijun40.github.io/音波图.html" class="button" target="_blank">音频动画</a>
+    <a href="https://HuoSaijun40.github.io/字数计算器.html" class="button" target="_blank">字数计算器</a>
+    <a href="https://HuoSaijun40.github.io/deepseek低配版.html" class="button" target="_blank">deepseek低配版</a>
+
+    <!-- 我的世界手机基岩版下载 -->
+    <div class="category">我的世界手机基岩版下载</div>
+    <a href="https://mcapks.net/" class="button" target="_blank">我的世界基岩版下载</a>
+
+    <!-- 我的世界电脑端Java版启动器下载 -->
+    <div class="category">我的世界电脑端Java版启动器下载</div>
+    <a href="https://hmcl.huangyuhui.net/download/" class="button" target="_blank">HMCL启动器下载</a>
+    <a href="https://afdian.com/a/LTCat" class="button" target="_blank">PCL2启动器下载</a>
+    <a href="https://www.labymod.net/en/download" class="button" target="_blank">LabyMod启动器下载</a>
+
+    <!-- 我的世界手机Java版启动器下载 -->
+    <div class="category">我的世界手机Java版启动器下载</div>
+    <a href="https://github.com/HMCL-dev/HMCL-PE/releases" class="button" target="_blank">HMCL-PE启动器下载</a>
+    <a href="https://github.com/FCL-Team/FoldCraftLauncher/tags" class="button" target="_blank">FCL启动器下载</a>
+    <a href="https://github.com/PojavLauncherTeam/PojavLauncher/releases" class="button" target="_blank">Pojav启动器下载</a>
+
+    <!-- 音乐资源分享 -->
+    <div class="category">音乐资源分享</div>
+    <a href="https://www.123912.com/s/vHncVv-ZlZNd" class="button" target="_blank">音乐资源</a>
+</body>
+</html>
