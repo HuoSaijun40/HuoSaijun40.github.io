@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本转二维码</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2); /* 页面背景渐变 */
+        }
+        #qrcode {
+            margin-top: 20px;
+        }
+        input, button {
+            margin: 5px;
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>文本转二维码</h1>
+    <input type="text" id="text-input" placeholder="输入文本">
+    <button onclick="generateQRCode()">生成二维码</button>
+    <button onclick="downloadQRCode()">下载二维码</button>
+    <div id="qrcode"></div>
+
+    <!-- 使用 qr-code-styling 库 -->
+    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <script>
+        // 初始化二维码实例
+        const qrCode = new QRCodeStyling({
+            width: 200,
+            height: 200,
+            data: "", // 初始数据为空
+            image: "", // 可以添加 Logo
+            dotsOptions: {
+                color: "#000", // 二维码点的颜色
+                type: "rounded" // 点的形状（rounded 或 square）
+            },
+            backgroundOptions: {
+                color: "transparent", // 背景透明，使用渐变背景
+            },
+            cornersSquareOptions: {
+                color: "#000", // 二维码角的颜色
+                type: "extra-rounded" // 角的形状（square、dot、extra-rounded）
+            },
+            cornersDotOptions: {
+                color: "#000", // 二维码中心点的颜色
+                type: "dot" // 中心点的形状（square、dot）
+            }
+        });
+
+        // 生成二维码的函数
+        function generateQRCode() {
+            const inputText = document.getElementById('text-input').value;
+            const qrcodeDiv = document.getElementById('qrcode');
+
+            if (!inputText) {
+                alert("请输入文本！");
+                return;
+            }
+
+            // 清空之前的二维码
+            qrcodeDiv.innerHTML = '';
+
+            // 更新二维码数据
+            qrCode.update({ data: inputText });
+
+            // 将二维码渲染到页面中
+            qrCode.append(qrcodeDiv);
+            console.log('二维码生成成功!');
+        }
+
+        // 下载二维码的函数
+        function downloadQRCode() {
+            qrCode.download({ name: "qrcode", extension: "png" });
+        }
+    </script>
+</body>
+</html>
