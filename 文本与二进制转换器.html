@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中文与二进制转换工具</title>
+    <title>文本与二进制转换工具</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -115,11 +115,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔁 中文与二进制转换器</h1>
+        <h1>🔁 文本与二进制转换器</h1>
         <textarea id="inputText" placeholder="在此输入中文或二进制内容..."></textarea>
         <div>
             <button onclick="convertToBinary()">➔ 转二进制</button>
-            <button onclick="convertToText()">➔ 转中文</button>
+            <button onclick="convertToText()">➔ 转文本</button>
         </div>
         <div class="output-container">
             <div class="output" id="output"></div>
@@ -134,7 +134,7 @@
         function convertToBinary() {
             const input = document.getElementById('inputText').value.trim();
             if (!input) {
-                alert('请输入中文文本！');
+                alert('请输入文本！');
                 return;
             }
 
