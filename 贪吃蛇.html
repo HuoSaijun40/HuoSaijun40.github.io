@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>贪吃蛇</title>
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --canvas-bg: #ffffff;
+            --canvas-border: #4CAF50;
+            --snake-body: #8BC34A;
+            --snake-head: #4CAF50;
+            --food-color: #FF5252;
+            --joystick-bg: rgba(0,0,0,0.1);
+            --button-bg: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #fff;
+                --joystick-bg: rgba(255,255,255,0.1);
+                --canvas-bg: #000000;
+            }
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background: var(--bg-color);
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            position: relative;
+            margin: 10px auto;
+        }
+
+        canvas {
+            border: 2px solid var(--canvas-border);
+            border-radius: 12px;
+            background-color: var(--canvas-bg);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            width: 90vw;
+            height: 90vw;
+            max-width: 300px;
+            max-height: 300px;
+        }
+
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: var(--text-color);
+            z-index: 1;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .joystick {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--joystick-bg);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .joystick .stick {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #fff;
+            position: absolute;
+            transition: all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .arrow-controls {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-rows: repeat(3, 60px);
+            grid-template-columns: repeat(3, 60px);
+            gap: 10px;
+            background: var(--joystick-bg);
+            padding: 10px;
+            border-radius: 10px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            aspect-ratio: 1/1;
+        }
+
+        .arrow-button {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--joystick-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: var(--text-color);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            aspect-ratio: 1/1;
+            user-select: none;
+        }
+
+        .arrow-button:active {
+            transform: scale(0.9);
+        }
+
+        .arrow-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .arrow-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .arrow-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .arrow-down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        .start-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 12px 24px;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            background: var(--button-bg);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(76,175,80,0.3);
+        }
+
+        .start-button:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 12px 24px rgba(76,175,80,0.4);
+        }
+
+        .toggle-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <div class="score">分数: 0</div>
+    </div>
+    <div class="joystick" id="joystick">
+        <div class="stick"></div>
+    </div>
+    <div class="arrow-controls" id="arrowControls" style="display: none;">
+        <div class="arrow-button arrow-up">↑</div>
+        <div class="arrow-button arrow-left">←</div>
+        <div class="arrow-button arrow-right">→</div>
+        <div class="arrow-button arrow-down">↓</div>
+    </div>
+    <button class="start-button" onclick="startGame()">开始游戏</button>
+    <button class="toggle-controls" onclick="toggleControlMode()">切换控制模式</button>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.querySelector('.score');
+        const joystick = document.querySelector('#joystick');
+        const arrowControls = document.querySelector('#arrowControls');
+        
+        const gridSize = 15;
+        const tileCountX = Math.floor(canvas.width / gridSize);
+        const tileCountY = Math.floor(canvas.height / gridSize);
+        
+        let snake = [
+            { x: Math.floor(tileCountX/2), y: Math.floor(tileCountY/2) },
+            { x: Math.floor(tileCountX/2)-1, y: Math.floor(tileCountY/2) },
+            { x: Math.floor(tileCountX/2)-2, y: Math.floor(tileCountY/2) }
+        ];
+        let food = { x: 5, y: 5 };
+        let direction = { x: 1, y: 0 };
+        let nextDirection = { x: 1, y: 0 };
+        let speed = 250;
+        let score = 0;
+        let isGameStarted = false;
+        let gameInterval;
+        let isUsingJoystick = true;
+        const originalSpeed = 250;
+
+        function startGame() {
+            if (gameInterval) clearInterval(gameInterval);
+            isGameStarted = true;
+            document.querySelector('.start-button').style.display = 'none';
+            placeFood();
+            speed = originalSpeed;
+            gameInterval = setInterval(gameLoop, speed);
+        }
+
+        function gameLoop() {
+            if (!isGameStarted) return;
+            
+            if (nextDirection.x !== -direction.x || nextDirection.y !== -direction.y) {
+                direction = { ...nextDirection };
+            }
+            
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            snake.unshift(head);
+            
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                scoreElement.textContent = `分数: ${score}`;
+                placeFood();
+                if (score >= 500) {
+                    alert('胜利！得分: ' + score);
+                    gameOver();
+                    return;
+                }
+            } else {
+                snake.pop();
+            }
+            
+            if (head.x < 0 || head.x >= tileCountX || head.y < 0 || head.y >= tileCountY) {
+                gameOver();
+                return;
+            }
+            
+            drawGame();
+        }
+
+        function drawGame() {
+            const styles = getComputedStyle(document.documentElement);
+            ctx.fillStyle = styles.getPropertyValue('--canvas-bg');
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillStyle = styles.getPropertyValue('--snake-body');
+            for (let i = 1; i < snake.length; i++) {
+                ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+                ctx.strokeRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+            }
+            
+            ctx.fillStyle = styles.getPropertyValue('--snake-head');
+            ctx.fillRect(snake[0].x * gridSize, snake[0].y * gridSize, gridSize, gridSize);
+            
+            ctx.fillStyle = styles.getPropertyValue('--food-color');
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+        function placeFood() {
+            const margin = 3;
+            food.x = Math.floor(Math.random() * (tileCountX - 2 * margin)) + margin;
+            food.y = Math.floor(Math.random() * (tileCountY - 2 * margin)) + margin;
+            for (let cell of snake) 
+                if (food.x === cell.x && food.y === cell.y) placeFood();
+        }
+
+        function gameOver() {
+            alert('游戏结束！得分: ' + score);
+            isGameStarted = false;
+            snake = [
+                { x: Math.floor(tileCountX/2), y: Math.floor(tileCountY/2) },
+                { x: Math.floor(tileCountX/2)-1, y: Math.floor(tileCountY/2) },
+                { x: Math.floor(tileCountX/2)-2, y: Math.floor(tileCountY/2) }
+            ];
+            direction = { x: 1, y: 0 };
+            nextDirection = { x: 1, y: 0 };
+            score = 0;
+            scoreElement.textContent = `分数: ${score}`;
+            document.querySelector('.start-button').style.display = 'block';
+            if (gameInterval) clearInterval(gameInterval);
+        }
+
+        let isDragging = false;
+        const stick = document.querySelector('.stick');
+        
+        joystick.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if (!isUsingJoystick) return;
+            isDragging = true;
+            updateStickPosition(e.touches[0].clientX, e.touches[0].clientY);
+        });
+
+        joystick.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!isDragging || !isUsingJoystick) return;
+            updateStickPosition(e.touches[0].clientX, e.touches[0].clientY);
+        });
+
+        joystick.addEventListener('touchend', () => {
+            if (isDragging) {
+                isDragging = false;
+                stick.style.transform = 'translate(0, 0)';
+            }
+        });
+
+        function updateStickPosition(clientX, clientY) {
+            const rect = joystick.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const deltaX = clientX - centerX;
+            const deltaY = clientY - centerY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const maxDistance = rect.width / 2 - 15;
+
+            if (distance > maxDistance) {
+                const angle = Math.atan2(deltaY, deltaX);
+                const limitedX = Math.cos(angle) * maxDistance;
+                const limitedY = Math.sin(angle) * maxDistance;
+                stick.style.transform = `translate(${limitedX}px, ${limitedY}px)`;
+            } else {
+                stick.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            }
+
+            const angle = Math.atan2(deltaY, deltaX);
+            if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) 
+                nextDirection = { x: Math.sign(Math.cos(angle)), y: 0 };
+            else 
+                nextDirection = { x: 0, y: Math.sign(Math.sin(angle)) };
+        }
+
+        function setDirection(newDirection) {
+            if (!isUsingJoystick) {
+                if (
+                    (newDirection.x === 0 && newDirection.y === -1 && direction.y !== 1) ||
+                    (newDirection.x === 0 && newDirection.y === 1 && direction.y !== -1) ||
+                    (newDirection.x === -1 && newDirection.y === 0 && direction.x !== 1) ||
+                    (newDirection.x === 1 && newDirection.y === 0 && direction.x !== -1)
+                ) {
+                    nextDirection = newDirection;
+                }
+            }
+        }
+
+        document.querySelector('.arrow-up').addEventListener('touchstart', e => {
+            e.preventDefault();
+            setDirection({ x: 0, y: -1 });
+        });
+
+        document.querySelector('.arrow-down').addEventListener('touchstart', e => {
+            e.preventDefault();
+            setDirection({ x: 0, y: 1 });
+        });
+
+        document.querySelector('.arrow-left').addEventListener('touchstart', e => {
+            e.preventDefault();
+            setDirection({ x: -1, y: 0 });
+        });
+
+        document.querySelector('.arrow-right').addEventListener('touchstart', e => {
+            e.preventDefault();
+            setDirection({ x: 1, y: 0 });
+        });
+
+        function toggleControlMode() {
+            isUsingJoystick = !isUsingJoystick;
+            joystick.style.display = isUsingJoystick ? 'flex' : 'none';
+            arrowControls.style.display = isUsingJoystick ? 'none' : 'grid';
+        }
+    </script>
+</body>
+</html>

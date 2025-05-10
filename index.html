@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的主页</title>
+    <style>
+        :root {
+            --bg-color: #e6f2ff;
+            --card-bg-color: white;
+            --text-color: #333;
+            --secondary-text-color: #666;
+            --button-gradient: linear-gradient(to bottom, #00b4ff, #007bff);
+            --button-hover-gradient: linear-gradient(to bottom, #0094ff, #0056b3);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --hover-shadow-color: rgba(0, 0, 0, 0.15);
+            --toggle-bg: #ccc;
+            --toggle-bg-active: #007bff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1f2937;
+            --card-bg-color: #2d3748;
+            --text-color: #ffffff;
+            --secondary-text-color: #cbd5e1;
+            --button-gradient: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+            --button-hover-gradient: linear-gradient(to bottom, #2563eb, #1e40af);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --hover-shadow-color: rgba(0, 0, 0, 0.3);
+            --toggle-bg: #6b7280;
+            --toggle-bg-active: #3b82f6;
+        }
+
+        body {
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        .section {
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        header {
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            font-size: 2.5rem;
+            margin: 0;
+        }
+        
+        p {
+            color: var(--secondary-text-color);
+            max-width: 800px;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .sections-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: flex-start;
+        }
+        
+        .section {
+            background-color: var(--card-bg-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            flex: 1;
+            min-width: 300px;
+            max-width: calc(50% - 60px);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-image: var(--button-gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .button:hover {
+            background-image: var(--button-hover-gradient);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--hover-shadow-color);
+        }
+
+        .theme-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-top: 20px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--toggle-bg);
+            transition: .4s;
+            border-radius: 34px;
+            outline: none !important;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--toggle-bg-active);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        * {
+            outline: none !important;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                text-align: center;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                margin: 10px auto 0;
+            }
+            
+            .sections-container {
+                justify-content: center;
+            }
+            
+            .section {
+                flex: 0 0 calc(100% - 140px);
+                max-width: calc(100% - 140px);
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .section {
+                flex: 0 0 calc(100% - 100px);
+                max-width: calc(100% - 100px);
+                padding: 20px;
+            }
+            
+            .button {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        .button, .slider {
+            transition: all 0.3s ease;
+        }
+
+        .button:hover, .slider:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>活塞的主页</h1>
+        <p>欢迎访问我的个人主页，这里有一些有趣的内容和资源分享</p>
+    </header>
+    
+    <div class="container">
+        <div class="sections-container">
+            <div class="section">
+                <h2 class="section-title">网站稳如老狗的运行了</h2>
+                <p id="runtime">正在计算网站运行时间...</p>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">我所在的平台</h2>
+                <div class="button-group">
+                    <a href="https://v.douyin.com/MZegERlp0lQ/" class="button" target="_blank">抖音主页</a>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">小游戏</h2>
+                <div class="button-group">
+                    <a href="https://huosaijun40.github.io/推箱子.html" class="button" target="_blank">推箱子</a>
+                    <a href="https://huosaijun40.github.io/贪吃蛇.html" class="button" target="_blank">贪吃蛇</a>
+                    <a href="https://huosaijun40.github.io/数字游戏.html" class="button" target="_blank">数字游戏</a>
+                    <a href="https://huosaijun40.github.io/井字棋.html" class="button" target="_blank">井字棋</a>
+                    <a href="https://huosaijun40.github.io/扫雷.html" class="button" target="_blank">扫雷</a>
+                    <a href="http://www.staggeringbeauty.com/" class="button" target="_blank">飘动的鳗鱼</a>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">小工具</h2>
+                <div class="button-group">
+                    <a href="https://huosaijun40.github.io/HTML代码运行器.html" class="button" target="_blank">HTML代码运行器</a>
+                    <a href="https://huosaijun40.github.io/字数计算器.html" class="button" target="_blank">字数计算器</a>
+                    <a href="https://huosaijun40.github.io/北京时间.html" class="button" target="_blank">北京时间</a>
+                    <a href="https://huosaijun40.github.io/文本转二维码.html" class="button" target="_blank">文本转二维码</a>
+                    <a href="https://huosaijun40.github.io/文本与二进制转换器.html" class="button" target="_blank">文本与二进制转换</a>
+                    <a href="https://huosaijun40.github.io/音频变速工具.html" class="button" target="_blank">音频变速工具</a>
+                    <a href="https://huosaijun40.github.io/浏览器彩蛋.html" class="button" target="_blank">浏览器彩蛋</a>
+                    <a href="https://huosaijun40.github.io/视频转字符动画.html" class="button" target="_blank">视频转字符动画</a>
+                    <a href="https://huosaijun40.github.io/文件名批量提取器.html" class="button" target="_blank">文件名批量提取器</a>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <label class="theme-toggle">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <p style="margin-top: 5px; font-size: 0.9rem;">切换主题</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">我的世界手机基岩版下载</h2>
+                <div class="button-group">
+                    <a href="https://mcapks.net/" class="button" target="_blank">我的世界基岩版下载</a>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">我的世界电脑Java版启动器下载</h2>
+                <div class="button-group">
+                    <a href="https://hmcl.huangyuhui.net/download/" class="button" target="_blank">HMCL启动器下载</a>
+                    <a href="https://afdian.com/a/LTCat" class="button" target="_blank">PCL2启动器下载</a>
+                    <a href="https://www.labymod.net/en/download" class="button" target="_blank">LabyMod启动器下载</a>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">我的世界手机Java版启动器下载</h2>
+                <div class="button-group">
+                    <a href="https://github.com/HMCL-dev/HMCL-PE/releases" class="button" target="_blank">HMCL-PE启动器下载</a>
+                    <a href="https://github.com/FCL-Team/FoldCraftLauncher/tags" class="button" target="_blank">FCL启动器下载</a>
+                    <a href="https://github.com/PojavLauncherTeam/PojavLauncher/releases" class="button" target="_blank">Pojav启动器下载</a>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">我的世界实用网站</h2>
+                <div class="button-group">
+                    <a href="https://www.mcmod.cn" class="button" target="_blank">mc百科</a>
+                    <a href="https://www.minebbs.com" class="button" target="_blank">mineBBS论坛</a>
+                    <a href="https://klpbbs.com" class="button" target="_blank">苦力怕论坛</a>
+                    <a href="https://www.mcnav.net" class="button" target="_blank">mc导航网</a>
+                    <a href="https://www.minecraft.net/zh-hans" class="button" target="_blank">国际我的世界官网</a>
+                    <a href="https://mc.163.com" class="button" target="_blank">网易我的世界官网</a>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">音乐资源分享</h2>
+                <div class="button-group">
+                    <a href="https://huosaijun40.github.io/音乐列表.html" class="button" target="_blank">音乐在线播放</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setThemeBasedOnSystem() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        }
+
+        if (window.matchMedia) {
+            const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            colorSchemeQuery.addEventListener('change', (e) => {
+                setThemeBasedOnSystem();
+            });
+        }
+
+        function updateRuntime() {
+            const creationTime = new Date("2025-02-29T13:24:16+08:00");
+            const beijingTime = new Date();
+            beijingTime.setHours(beijingTime.getHours() + 8);
+            const runtime = beijingTime - creationTime;
+            const days = Math.floor(runtime / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((runtime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((runtime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((runtime % (1000 * 60)) / 1000);
+            document.getElementById('runtime').textContent = ` ${days} 天 ${hours} 小时 ${minutes} 分钟 ${seconds} 秒`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setThemeBasedOnSystem();
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('change', toggleTheme);
+
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                themeToggle.checked = true;
+            } else {
+                themeToggle.checked = false;
+            }
+            
+            updateRuntime();
+            
+            setInterval(updateRuntime, 1000);
+        });
+    </script>
+</body>
+</html>

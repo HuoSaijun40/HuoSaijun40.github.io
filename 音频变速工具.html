@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音频变速工具</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #2d3436;
+            --control-bg: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(0, 0, 0, 0.05);
+            --primary-color: #4dabf7;
+            --shadow-intensity: 0.1;
+            --gradient-start: #f8f9fa;
+            --gradient-end: #e9ecef;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #2d3436;
+            --text-color: #f8f9fa;
+            --control-bg: rgba(45, 52, 54, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --primary-color: #63a4ff;
+            --shadow-intensity: 0.3;
+            --gradient-start: #2d3436;
+            --gradient-end: #1a1e1f;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            background: rgba(var(--bg-color), 0.95);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, calc(0.1 * var(--shadow-intensity)));
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: -0.03em;
+        }
+
+        .controls {
+            margin: 2rem 0;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: var(--control-bg);
+            border-radius: 16px;
+            backdrop-filter: blur(6px);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .control-group:hover {
+            transform: translateY(-2px);
+        }
+
+        .control-group.buttons-group {
+            display: flex;
+            gap: 12px;
+            padding: 1rem 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .control-group.buttons-group {
+                flex-wrap: wrap;
+            }
+            .control-group.buttons-group button {
+                flex: 1 1 45%;
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(77, 171, 247, calc(0.3 * var(--shadow-intensity)));
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(77, 171, 247, calc(0.4 * var(--shadow-intensity)));
+        }
+
+        .speed-display {
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            box-shadow: 0 4px 12px rgba(77, 171, 247, calc(0.2 * var(--shadow-intensity)));
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #339af0 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(77, 171, 247, calc(0.3 * var(--shadow-intensity)));
+        }
+
+        button:disabled {
+            background: #ced4da;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .file-input {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .file-input input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input label {
+            display: block;
+            padding: 1.5rem;
+            background: rgba(77, 171, 247, 0.1);
+            border: 2px dashed var(--primary-color);
+            border-radius: 16px;
+            text-align: center;
+            color: #339af0;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .file-input label:hover {
+            background: rgba(77, 171, 247, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .file-input label::before {
+            content: "📁 点击选择文件";
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>音频变速工具</h1>
+        
+        <div class="file-input">
+            <input type="file" id="audio-file" accept="audio/*">
+            <label for="audio-file"></label>
+        </div>
+        
+        <div id="player-controls" class="controls" style="display: none;">
+            <div class="control-group buttons-group">
+                <button id="play-btn">▶️ 播放</button>
+                <button id="pause-btn">⏸️ 暂停</button>
+                <button id="stop-btn">⏹️ 停止</button>
+            </div>
+            
+            <div class="control-group">
+                <label for="speed">播放速度/音调</label>
+                <div class="speed-container">
+                    <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1">
+                    <span class="speed-display" id="speed-display">1.0X</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const themeMedia = window.matchMedia('(prefers-color-scheme: dark)')
+        function setTheme() {
+            document.documentElement.setAttribute('data-theme', 
+                themeMedia.matches ? 'dark' : 'light'
+            )
+        }
+        setTheme()
+        themeMedia.addEventListener('change', setTheme)
+
+        const audioFileInput = document.getElementById('audio-file');
+        const playerControls = document.getElementById('player-controls');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const speedControl = document.getElementById('speed');
+        const speedDisplay = document.getElementById('speed-display');
+        
+        let audioBuffer = null;
+        let audioContext = null;
+        let sourceNode = null;
+        let isPlaying = false;
+
+        audioFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            playerControls.style.display = 'block';
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+            } catch (error) {
+                console.error('音频处理错误:', error);
+                alert('无法处理音频文件，请确保文件格式正确。');
+            }
+        });
+
+        playBtn.addEventListener('click', () => {
+            if (!audioBuffer) return;
+            
+            sourceNode = audioContext.createBufferSource();
+            sourceNode.buffer = audioBuffer;
+            sourceNode.playbackRate.value = parseFloat(speedControl.value);
+            
+            sourceNode.connect(audioContext.destination);
+            sourceNode.start(0);
+            isPlaying = true;
+            
+            playBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stopBtn.disabled = false;
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            if (!sourceNode || !isPlaying) return;
+            
+            sourceNode.stop(0);
+            isPlaying = false;
+            
+            playBtn.disabled = false;
+            pauseBtn.disabled = true;
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (!sourceNode) return;
+            
+            sourceNode.stop(0);
+            isPlaying = false;
+            
+            playBtn.disabled = false;
+            pauseBtn.disabled = true;
+        });
+
+        speedControl.addEventListener('input', () => {
+            if (sourceNode) {
+                sourceNode.playbackRate.value = parseFloat(speedControl.value);
+            }
+            speedDisplay.textContent = speedControl.value + 'X';
+        });
+    </script>
+</body>
+</html>

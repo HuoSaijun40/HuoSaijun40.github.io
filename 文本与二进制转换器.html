@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本与二进制转换器</title>
+    <style>
+        :root {
+            --background: #f8f9fa;
+            --container-bg: #fff;
+            --text-color: #2d3436;
+            --border-color: #e0e0e0;
+            --output-bg: #f8f9fa;
+            --output-border: #f1f3f5;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #1a1a1a;
+                --container-bg: #2d2d2d;
+                --text-color: #e0e0e0;
+                --border-color: #404040;
+                --output-bg: #333333;
+                --output-border: #404040;
+            }
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-width: 560px;
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 1.8rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 1rem;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+            line-height: 1.5;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+        }
+
+        textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        button {
+            padding: 0.8rem 1.8rem;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #007bff, #0062cc);
+            color: white;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .output-container {
+            margin-top: 2rem;
+            border: 2px solid var(--output-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            background-color: var(--output-bg);
+            text-align: left;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .output {
+            font-size: 16px;
+            word-wrap: break-word;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-right: 50px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: rgba(0, 123, 255, 0.1);
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            height: 36px;
+            border-radius: 18px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: white;
+            font-weight: 500;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .copy-button {
+                background-color: rgba(0, 123, 255, 0.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔁 文本与二进制转换器</h1>
+        <textarea id="inputText" placeholder="在此输入文本或二进制内容..."></textarea>
+        <div>
+            <button onclick="convertToBinary()">➔ 转二进制</button>
+            <button onclick="convertToText()">➔ 转文本</button>
+        </div>
+        <div class="output-container">
+            <div class="output" id="output"></div>
+            <button class="copy-button" onclick="copyOutput()">复制</button>
+        </div>
+    </div>
+
+    <script>
+        function convertToBinary() {
+            const input = document.getElementById('inputText').value.trim();
+            if (!input) {
+                alert('请输入文本！');
+                return;
+            }
+
+            let binaryOutput = '';
+            for (let i = 0; i < input.length; i++) {
+                const charCode = input.charCodeAt(i);
+                if (charCode >= 0 && charCode <= 65535) { 
+                    const binary = charCode.toString(2).padStart(16, '0'); 
+                    binaryOutput += binary + ' '; 
+                } else {
+                    alert('输入包含无效字符，请检查后重试！');
+                    return;
+                }
+            }
+            document.getElementById('output').textContent = binaryOutput.trim();
+        }
+
+        function convertToText() {
+            const input = document.getElementById('inputText').value.trim();
+            if (!input) {
+                alert('请输入二进制文本！');
+                return;
+            }
+
+            const binaryArray = input.split(' ');
+            let textOutput = '';
+
+            for (let i = 0; i < binaryArray.length; i++) {
+                const binary = binaryArray[i];
+                if (binary) {
+                    const charCode = parseInt(binary, 2);
+                    if (!isNaN(charCode)) {
+                        textOutput += String.fromCharCode(charCode);
+                    } else {
+                        alert('输入包含无效的二进制数据，请检查后重试！');
+                        return;
+                    }
+                }
+            }
+
+            document.getElementById('output').textContent = textOutput;
+        }
+
+        function copyOutput() {
+            const outputText = document.getElementById('output').textContent;
+            if (!outputText) {
+                alert('没有内容可复制！');
+                return;
+            }
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(outputText)
+                    .then(() => alert('已复制到剪贴板！'))
+                    .catch(() => alert('复制失败，请手动复制。'));
+            } else {
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = outputText;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+                alert('已复制到剪贴板！');
+            }
+        }
+    </script>
+</body>
+</html>

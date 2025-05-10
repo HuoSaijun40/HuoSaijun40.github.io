@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本转二维码</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --button-bg: #007bff;
+            --button-hover: #0056b3;
+            --gradient-start: #f5f7fa;
+            --gradient-end: #c3cfe2;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --input-bg: #2d2d2d;
+            --input-border: #555555;
+            --button-bg: #4a90e2;
+            --button-hover: #357abd;
+            --gradient-start: #2c3e50;
+            --gradient-end: #3498db;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: var(--text-color);
+        }
+
+        #qrcode {
+            margin-top: 20px;
+        }
+
+        input, button {
+            margin: 5px;
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        button {
+            background-color: var(--button-bg);
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+        }
+    </style>
+</head>
+<body>
+    <h1>文本转二维码</h1>
+    <input type="text" id="text-input" placeholder="输入文本或URL">
+    <button onclick="generateQRCode()">生成二维码</button>
+    <button onclick="downloadQRCode()">下载二维码</button>
+    <div id="qrcode"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script>
+        let qrCodeDataUrl = null;
+
+        const setTheme = (isDark) => {
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        };
+
+        const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        setTheme(colorSchemeQuery.matches);
+        colorSchemeQuery.addEventListener('change', (e) => setTheme(e.matches));
+
+        function generateQRCode() {
+            const inputText = document.getElementById('text-input').value;
+            const qrcodeDiv = document.getElementById('qrcode');
+
+            if (!inputText) {
+                alert("请输入文本或URL！");
+                return;
+            }
+
+            qrcodeDiv.innerHTML = '';
+
+            QRCode.toDataURL(inputText, {
+                width: 200,
+                height: 200,
+                color: {
+                    dark: document.documentElement.getAttribute('data-theme') === 'dark' ? "#ffffff" : "#000000",
+                    light: document.documentElement.getAttribute('data-theme') === 'dark' ? "#2d2d2d" : "#ffffff"
+                }
+            }, (err, url) => {
+                if (err) {
+                    console.error("生成二维码失败：", err);
+                    alert("生成二维码失败，请检查输入内容！");
+                    return;
+                }
+
+                const img = document.createElement("img");
+                img.src = url;
+                img.alt = "二维码";
+                qrcodeDiv.appendChild(img);
+                qrCodeDataUrl = url;
+            });
+        }
+
+        function downloadQRCode() {
+            if (!qrCodeDataUrl) {
+                alert("请先生成二维码！");
+                return;
+            }
+
+            const downloadLink = document.createElement("a");
+            downloadLink.href = qrCodeDataUrl;
+            downloadLink.download = "qrcode.png";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    </script>
+</body>
+</html>

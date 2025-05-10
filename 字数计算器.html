@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字数计算器</title>
+    <style>
+        :root {
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --input-bg: #fff;
+            --input-border: #ccc;
+            --button-bg: #66afe9;
+            --button-hover: #5599cc;
+            --result-border: #66afe9;
+            --result-bg: #e9f5ff;
+            --transition: all 0.3s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #e0e0e0;
+                --input-bg: #2d2d2d;
+                --input-border: #404040;
+                --button-bg: #3a6d8c;
+                --button-hover: #2d576d;
+                --result-border: #3a6d8c;
+                --result-bg: #2d3d4d;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            resize: vertical;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            border-color: var(--button-bg);
+            outline: none;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            transition: var(--transition);
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            background-color: var(--result-bg);
+            border-radius: 10px;
+            border: 2px solid var(--result-border);
+            color: var(--text-color);
+            white-space: pre-wrap;
+            transition: var(--transition);
+        }
+    </style>
+</head>
+<body>
+    <h1>字数计算器</h1>
+    <textarea id="textInput" placeholder="在此处输入或粘贴文字..."></textarea>
+    <button onclick="countWords()">开始统计</button>
+    <div id="result"></div>
+
+    <script>
+        function countWords() {
+            const rawText = document.getElementById("textInput").value;
+            const noWhitespaceText = rawText.replace(/[\s\n\r\t　]+/g, '');
+            const totalCount = noWhitespaceText.length;
+            const cleanText = noWhitespaceText.replace(/[\p{P}\p{S}]/gu, '');
+            const textCount = cleanText.length;
+            document.getElementById("result").innerText = 
+                `总字数: ${totalCount}\n纯文本字数: ${textCount}`;
+        }
+    </script>
+</body>
+</html>

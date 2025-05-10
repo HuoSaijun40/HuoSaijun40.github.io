@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>视频转字符动画</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --border-color: #ddd;
+            --preview-bg: #000;
+            --preview-text: #fff;
+            --gradient-start: #f5f7fa;
+            --gradient-end: #c3cfe2;
+            --btn-gradient-start: #4CAF50;
+            --btn-gradient-end: #2196F3;
+            --title-gradient-start: #4CAF50;
+            --title-gradient-end: #2196F3;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --input-bg: rgba(0, 0, 0, 0.6);
+            --border-color: #444;
+            --preview-bg: #2d2d2d;
+            --preview-text: #e0e0e0;
+            --gradient-start: #2c3e50;
+            --gradient-end: #3498db;
+            --btn-gradient-start: #66BB6A;
+            --btn-gradient-end: #42A5F5;
+            --title-gradient-start: #66BB6A;
+            --title-gradient-end: #42A5F5;
+        }
+
+        body {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+            background: linear-gradient(45deg, var(--title-gradient-start), var(--title-gradient-end));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: background 0.3s ease;
+        }
+
+        #description {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            background: linear-gradient(45deg, var(--title-gradient-start), var(--title-gradient-end));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: background 0.3s ease;
+        }
+
+        a {
+            color: var(--btn-gradient-start);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            background-color: var(--input-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+
+        .input-group:hover {
+            transform: translateY(-2px);
+        }
+
+        label {
+            display: block;
+            margin: 5px 0;
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        input[type="file"], input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="file"]:hover, input[type="number"]:hover, input[type="text"]:hover {
+            border-color: var(--btn-gradient-start);
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 10px 0;
+            background: linear-gradient(45deg, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        button:disabled, input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #eee;
+        }
+
+        #progress {
+            margin: 15px 0;
+            font-size: 14px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        #downloadLink {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: var(--btn-gradient-start);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        #downloadLink:hover {
+            color: var(--btn-gradient-end);
+        }
+
+        #preview {
+            white-space: pre;
+            font-family: monospace;
+            margin-top: 20px;
+            background-color: var(--preview-bg);
+            color: var(--preview-text);
+            padding: 10px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>视频转字符动画</h1>
+    <p id="description">本网页生成的是Python脚本，需要安装<a href="https://www.python.org/" target="_blank">Python</a>运行</p>
+    
+    <div class="input-group">
+        <label>选择视频文件：</label>
+        <input type="file" id="videoInput" accept="video/*">
+    </div>
+
+    <div class="input-group">
+        <label>输出宽度（字符数，建议80-120）：</label>
+        <input type="number" id="outputWidth" value="80">
+    </div>
+
+    <div class="input-group">
+        <label>帧率（FPS，建议5-15）：</label>
+        <input type="number" id="fps" value="10">
+    </div>
+
+    <div class="input-group">
+        <label>字符集（从暗到亮排列）：</label>
+        <input type="text" id="chars" value=".:-=+*#%@">
+    </div>
+
+    <button id="convertBtn" onclick="processVideo()">开始转换</button>
+    
+    <div id="progress"></div>
+    <a id="downloadLink" style="display: none;">下载Python脚本</a>
+
+    <script>
+        const controls = [
+            'videoInput', 
+            'outputWidth',
+            'fps',
+            'chars',
+            'convertBtn'
+        ];
+
+        function updateTheme(e) {
+            document.documentElement.setAttribute('data-theme', 
+                e.matches ? 'dark' : 'light'
+            );
+        }
+
+        const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        darkModeQuery.addEventListener('change', updateTheme);
+        updateTheme(darkModeQuery);
+
+        function disableControls() {
+            controls.forEach(id => {
+                const el = document.getElementById(id);
+                el.disabled = true;
+                el.style.pointerEvents = 'none';
+            });
+        }
+
+        function enableControls() {
+            controls.forEach(id => {
+                const el = document.getElementById(id);
+                el.disabled = false;
+                el.style.pointerEvents = 'auto';
+            });
+        }
+
+        function processVideo() {
+            disableControls();
+            
+            try {
+                const file = document.getElementById('videoInput').files[0];
+                if (!file) {
+                    alert('请先选择视频文件');
+                    enableControls();
+                    return;
+                }
+                
+                const outputWidth = parseInt(document.getElementById('outputWidth').value) || 80;
+                const fps = parseInt(document.getElementById('fps').value) || 10;
+                const chars = document.getElementById('chars').value || '@%#*+=-:. ';
+
+                const video = document.createElement('video');
+                video.muted = true;
+                video.src = URL.createObjectURL(file);
+
+                video.addEventListener('loadedmetadata', () => {
+                    const aspectRatio = video.videoHeight / video.videoWidth;
+                    const outputHeight = Math.round(outputWidth * aspectRatio * 0.5);
+                    
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = outputWidth;
+                    canvas.height = outputHeight;
+
+                    let currentTime = 0;
+                    const frameStep = 1 / fps;
+                    const totalFrames = Math.ceil(video.duration * fps);
+                    let processedFrames = 0;
+                    const frames = [];
+
+                    video.addEventListener('seeked', handleSeek);
+                    video.addEventListener('error', handleError);
+
+                    function handleSeek() {
+                        try {
+                            ctx.drawImage(video, 0, 0, outputWidth, outputHeight);
+                            const imageData = ctx.getImageData(0, 0, outputWidth, outputHeight);
+                            const ascii = convertToAscii(imageData, chars);
+                            frames.push(ascii);
+                            processedFrames++;
+
+                            document.getElementById('progress').textContent = 
+                                `处理进度：${((processedFrames / totalFrames) * 100).toFixed(1)}%`;
+
+                            if (currentTime >= video.duration || processedFrames >= totalFrames) {
+                                video.removeEventListener('seeked', handleSeek);
+                                generateScript(frames, fps);
+                                enableControls();
+                                return;
+                            }
+
+                            currentTime = Math.min(currentTime + frameStep, video.duration);
+                            video.currentTime = currentTime;
+                        } catch (error) {
+                            enableControls();
+                            console.error(error);
+                        }
+                    }
+
+                    function handleError() {
+                        enableControls();
+                        alert('视频处理出错');
+                    }
+
+                    video.currentTime = currentTime;
+                });
+
+                video.addEventListener('error', function() {
+                    enableControls();
+                    alert('视频加载失败');
+                });
+            } catch (error) {
+                enableControls();
+                console.error(error);
+            }
+        }
+
+        function convertToAscii(imageData, chars) {
+            const data = imageData.data;
+            let asciiFrame = '';
+            
+            for (let y = 0; y < imageData.height; y++) {
+                let line = '';
+                for (let x = 0; x < imageData.width; x++) {
+                    const i = (y * imageData.width + x) * 4;
+                    const r = data[i];
+                    const g = data[i+1];
+                    const b = data[i+2];
+                    
+                    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const charIndex = Math.floor((gray / 255) * (chars.length - 1));
+                    
+                    line += chars[charIndex];
+                }
+                asciiFrame += line + '\n';
+            }
+            return asciiFrame;
+        }
+
+        function generateScript(frames, fps) {
+            const pyCode = `import time\n\nframes = ${JSON.stringify(frames)}\n\n` +
+                `try:\n    while True:\n` +
+                `        for frame in frames:\n` +
+                `            print('\\033c' + frame, end='')\n` +
+                `            time.sleep(${1/fps})\n` +
+                `except KeyboardInterrupt:\n    print('\\033c')\n`;
+
+            const blob = new Blob([pyCode], { type: 'text/python' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.getElementById('downloadLink');
+            link.href = url;
+            link.download = 'ascii_video.py';
+            link.style.display = 'block';
+            
+            document.getElementById('progress').textContent = '转换完成！点击下方链接下载脚本';
+        }
+    </script>
+</body>
+</html>

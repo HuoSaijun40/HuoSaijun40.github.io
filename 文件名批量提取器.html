@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件名提取工具</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-hover: #357abd;
+            --background: #f5f7fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            background: var(--background);
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+            padding: 2rem;
+            transition: transform 0.2s;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        input[type="file"]:hover {
+            border-color: var(--primary);
+        }
+
+        .format-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        #format {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        #format:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        #result {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+                border-radius: 12px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .format-container {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📁 文件名批量提取器</h1>
+        
+        <div class="input-group">
+            <input type="file" id="fileInput" multiple>
+        </div>
+
+        <div class="format-container">
+            <input type="text" id="format" value="X" placeholder="输入格式（使用X作为占位符）">
+            <button onclick="processFiles()">生成列表</button>
+        </div>
+
+        <div id="result"></div>
+        <button class="copy-btn" onclick="copyToClipboard()">📋 复制结果</button>
+    </div>
+
+    <script>
+        function processFiles() {
+            const fileInput = document.getElementById('fileInput');
+            const format = document.getElementById('format').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!fileInput.files.length) {
+                showMessage("请先选择文件！", 'error');
+                return;
+            }
+
+            let output = "";
+            const files = Array.from(fileInput.files);
+
+            files.forEach(file => {
+                const fileName = file.name;
+                let line = format.replace(/X/g, fileName);
+                output += line + "\n";
+            });
+
+            resultDiv.textContent = output;
+        }
+
+        async function copyToClipboard() {
+            const result = document.getElementById('result').textContent;
+            if (!result) {
+                showMessage("没有内容可复制！", 'error');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(result);
+                showMessage("已复制到剪贴板！", 'success');
+            } catch (err) {
+                showMessage("复制失败，请手动选择复制", 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.textContent = text;
+            msg.style = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 12px 24px;
+                border-radius: 8px;
+                background: ${type === 'error' ? '#ff4757' : '#2ed573'};
+                color: white;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        // 文件拖放支持
+        const container = document.querySelector('.container');
+        container.addEventListener('dragover', e => {
+            e.preventDefault();
+            container.style.transform = 'scale(1.01)';
+        });
+
+        container.addEventListener('dragleave', () => {
+            container.style.transform = 'scale(1)';
+        });
+
+        container.addEventListener('drop', e => {
+            e.preventDefault();
+            container.style.transform = 'scale(1)';
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+        });
+    </script>
+</body>
+</html>

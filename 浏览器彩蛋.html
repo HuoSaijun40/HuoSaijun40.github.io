@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>🎮 浏览器彩蛋</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --text-color: #333;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 30px;
+            --transition: all 0.3s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                --card-bg: rgba(0, 0, 0, 0.9);
+                --text-color: #ecf0f1;
+                --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            backdrop-filter: blur(15px);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 70%);
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #result {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .main-button {
+            display: block;
+            width: 100%;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            text-align: center;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .main-button:active {
+            transform: translateY(0);
+        }
+
+        .alert-box {
+            padding: 1.2rem;
+            border-radius: 16px;
+            margin: 1rem 0;
+            display: none;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .alert-box.visible {
+            display: flex;
+            animation: slideIn 0.4s ease forwards, floatEffect 3s infinite ease-in-out;
+        }
+
+        .alert-box.info {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary);
+        }
+
+        .alert-box.success {
+            background: rgba(46, 204, 113, 0.15);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-box.warning {
+            background: rgba(241, 196, 15, 0.15);
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-text {
+            flex: 1;
+            margin: 0 1rem;
+            word-break: break-all;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .copy-btn:hover {
+            background: #2980b9;
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-20px); 
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0); 
+                opacity: 1;
+            }
+        }
+
+        @keyframes floatEffect {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.8rem;
+                border-radius: 20px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .main-button {
+                padding: 0.9rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 浏览器彩蛋</h1>
+        <div id="result">正在识别你的设备...</div>
+        <button class="main-button" onclick="activateEasterEgg()">🚀 立即游玩彩蛋</button>
+        
+        <div id="alertBox" class="alert-box">
+            <span class="alert-text" id="alertText"></span>
+            <button class="copy-btn" onclick="copyToClipboard()">复制</button>
+        </div>
+    </div>
+
+    <script>
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            let browser = {
+                name: '未知浏览器',
+                isMobile: /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua)
+            };
+
+            const browserMap = {
+                'Edg': 'Microsoft Edge',
+                'Chrome': 'Google Chrome',
+                'Firefox': 'Mozilla Firefox',
+                'Safari': 'Apple Safari'
+            };
+
+            for (const [key, value] of Object.entries(browserMap)) {
+                if (ua.includes(key)) {
+                    browser.name = value;
+                    if (browser.isMobile) browser.name += ' Mobile';
+                    break;
+                }
+            }
+            return browser;
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertBox = document.getElementById('alertBox');
+            const alertText = document.getElementById('alertText');
+            alertText.textContent = message;
+            alertBox.className = `alert-box ${type} visible`;
+            
+            clearTimeout(window.alertTimeout);
+            window.alertTimeout = setTimeout(() => {
+                alertBox.className = 'alert-box';
+            }, 5000);
+        }
+
+        async function copyToClipboard() {
+            try {
+                await navigator.clipboard.writeText(document.getElementById('alertText').textContent);
+                showAlert('✅ 已成功复制到剪贴板！', 'success');
+            } catch {
+                showAlert('⚠️ 复制失败，请手动选择文字复制', 'warning');
+            }
+        }
+
+        function tryAutoRedirect(target) {
+            let timer = 5;
+            const interval = setInterval(() => {
+                showAlert(`⏳ 将在 ${timer--} 秒后自动跳转...\n如未生效请手动访问：${target}`, 'info');
+                if (timer < 0) {
+                    clearInterval(interval);
+                    window.location.href = target;
+                }
+            }, 1000);
+        }
+
+        function activateEasterEgg() {
+            const browser = detectBrowser();
+            const targets = {
+                'Google Chrome': 'chrome://dino',
+                'Microsoft Edge': 'edge://surf',
+                'Mozilla Firefox': 'about:mozilla',
+                'Apple Safari': 'about:config',
+                'Google Chrome Mobile': 'chrome://dino',
+                'Microsoft Edge Mobile': 'edge://surf'
+            };
+
+            const target = targets[browser.name];
+            
+            if (!target) {
+                showAlert('🚨 未找到对应彩蛋\n试试访问：about:about', 'warning');
+                return;
+            }
+
+            if (browser.isMobile) {
+                try {
+                    window.location.href = target;
+                    setTimeout(() => {
+                        showAlert(`📱 移动端可能需要手动访问：\n${target}`, 'warning');
+                    }, 1000);
+                } catch (e) {
+                    showAlert(`📱 请手动访问：\n${target}`, 'warning');
+                }
+            } else {
+                tryAutoRedirect(target);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const browser = detectBrowser();
+            document.getElementById('result').textContent = `识别到：${browser.name}`;
+        });
+    </script>
+</body>
+</html>

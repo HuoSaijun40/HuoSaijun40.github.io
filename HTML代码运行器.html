@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML代码运行器</title>
+    <style>
+        :root {
+            --bg-gradient-start: #f5f7fa;
+            --bg-gradient-end: #c3cfe2;
+            --text-color: #333;
+            --code-bg: rgba(255, 255, 255, 0.9);
+            --button-gradient-start: #6a11cb;
+            --button-gradient-end: #2575fc;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-gradient-start: #2c3e50;
+                --bg-gradient-end: #3498db;
+                --text-color: #ecf0f1;
+                --code-bg: rgba(0, 0, 0, 0.8);
+                --button-gradient-start: #8e2de2;
+                --button-gradient-end: #4a00e0;
+                --shadow-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px var(--shadow-color);
+        }
+
+        #code {
+            width: 90%;
+            max-width: 800px;
+            height: 200px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            background: var(--code-bg);
+            resize: vertical;
+            transition: all 0.5s ease;
+            color: var(--text-color);
+        }
+
+        #run {
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end));
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTML代码运行器</h1>
+    <textarea id="code" placeholder="在这里输入你的HTML代码..."></textarea>
+    <br>
+    <button id="run">运行代码</button>
+
+    <script>
+        document.getElementById('run').addEventListener('click', function() {
+            const code = document.getElementById('code').value;
+            const blob = new Blob([code], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        });
+    </script>
+</body>
+</html>

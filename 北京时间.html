@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北京时间</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f5;
+            transition: background-color 0.5s ease;
+        }
+
+        #time-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #time-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        #beijing-time {
+            font-size: 32px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #date-display {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        #theme-toggle {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #theme-toggle:hover {
+            background-color: #0056b3;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .dark-mode #time-container {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .dark-mode #beijing-time {
+            color: #ffffff;
+        }
+
+        .dark-mode #date-display {
+            color: #cccccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="time-container">
+        <div id="beijing-time"></div>
+        <div id="date-display"></div>
+        <button id="theme-toggle">切换主题</button>
+    </div>
+    <script>
+        let manualOverride = false;
+
+        function getBeijingTime() {
+            const now = new Date();
+            const options = {
+                timeZone: 'Asia/Shanghai',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            return now.toLocaleString('zh-CN', options);
+        }
+
+        function getFormattedDate() {
+            const now = new Date();
+            const options = {
+                timeZone: 'Asia/Shanghai',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            };
+            return now.toLocaleString('zh-CN', options);
+        }
+
+        function updateTime() {
+            const timeDiv = document.getElementById('beijing-time');
+            const dateDiv = document.getElementById('date-display');
+            timeDiv.textContent = getBeijingTime();
+            dateDiv.textContent = getFormattedDate();
+        }
+
+        function applySystemTheme() {
+            const body = document.body;
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isDark) {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+            updateButtonText();
+        }
+
+        function toggleTheme() {
+            manualOverride = true;
+            document.body.classList.toggle('dark-mode');
+            updateButtonText();
+        }
+
+        function updateButtonText() {
+            const themeButton = document.getElementById('theme-toggle');
+            themeButton.textContent = document.body.classList.contains('dark-mode') ? '切换浅色主题' : '切换深色主题';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateTime();
+            setInterval(updateTime, 1000);
+            applySystemTheme();
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!manualOverride) applySystemTheme();
+            });
+            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        });
+    </script>
+</body>
+
+</html>

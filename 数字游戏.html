@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字游戏</title>
+    <style>
+        :root {
+            --bg-gradient-start: #f5f7fa;
+            --bg-gradient-end: #c3cfe2;
+            --game-container-bg: white;
+            --text-color: #2c3e50;
+            --status-bg: #f8f9fa;
+            --input-border: #ddd;
+            --button-bg: #3498db;
+            --button-hover: #2980b9;
+            --disabled-bg: #bdc3c7;
+            --instructions-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-gradient-start: #2c3e50;
+                --bg-gradient-end: #34495e;
+                --game-container-bg: #2d2d2d;
+                --text-color: #ffffff;
+                --status-bg: #3d3d3d;
+                --input-border: #4a4a4a;
+                --button-bg: #2980b9;
+                --button-hover: #3498db;
+                --disabled-bg: #5d5d5d;
+                --instructions-bg: rgba(45, 45, 45, 0.9);
+            }
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .game-container {
+            background: var(--game-container-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .game-container:hover {
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+            background: var(--game-container-bg);
+            color: var(--text-color);
+        }
+
+        input:focus {
+            border-color: var(--button-bg);
+            outline: none;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--button-bg);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        button:disabled {
+            background-color: var(--disabled-bg);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            margin: 15px 0;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--status-bg);
+        }
+
+        .robot-action {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--instructions-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h2>数字游戏</h2>
+        <div class="input-group">
+            <input type="number" id="targetNumber" placeholder="输入目标数字 (5-256)">
+            <button id="startButton" onclick="startGame()">开始游戏</button>
+        </div>
+        <div class="status" id="currentNumber">当前数字：0</div>
+        <div class="status" id="gameStatus">等待游戏开始...</div>
+        <div class="status robot-action" id="robotAction"></div>
+        <div class="buttons btn-group">
+            <button id="btn1" onclick="playerTurn(1)" disabled>+1</button>
+            <button id="btn2" onclick="playerTurn(2)" disabled>+2</button>
+            <button id="btn3" onclick="playerTurn(3)" disabled>+3</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>玩法介绍</h3>
+        <ul>
+            <li>1. 在输入框中输入一个目标数字（范围为5到256），然后点击“开始游戏”。</li>
+            <li>2. 游戏会随机决定玩家或机器人先手。</li>
+            <li>3. 玩家可以通过点击+1、+2或+3按钮来增加当前数字。</li>
+            <li>4. 机器人会自动随机增加1到3的数字。</li>
+            <li>5. 谁先让当前数字达到或超过目标数字，谁就输掉比赛。</li>
+        </ul>
+    </div>
+
+    <script>
+        let target = 0;
+        let currentNumber = 0;
+        let isPlayerTurn = false;
+        let gameActive = false;
+        let lastRobotAction = 0;
+
+        function startGame() {
+            const targetInput = document.getElementById('targetNumber');
+            const startButton = document.getElementById('startButton');
+            target = parseInt(targetInput.value);
+            
+            if (isNaN(target) || target < 5 || target > 256) {
+                alert("请输入有效的目标数字（范围为5到256）");
+                return;
+            }
+
+            targetInput.disabled = true;
+            startButton.disabled = true;
+            currentNumber = 0;
+            gameActive = true;
+            document.getElementById('currentNumber').textContent = `当前数字：${currentNumber}`;
+            document.getElementById('robotAction').textContent = "";
+            
+            isPlayerTurn = Math.random() < 0.5;
+            document.getElementById('gameStatus').textContent = isPlayerTurn ? 
+                "玩家回合！" : "机器人回合...";
+            
+            updateButtonState();
+            if (!isPlayerTurn) {
+                setTimeout(robotTurn, 1000);
+            }
+        }
+
+        function playerTurn(num) {
+            if (!gameActive || !isPlayerTurn) return;
+            
+            currentNumber += num;
+            updateGameState();
+            
+            if (checkLoss()) {
+                gameOver(true);
+                return;
+            }
+            
+            isPlayerTurn = false;
+            document.getElementById('gameStatus').textContent = "机器人回合...";
+            updateButtonState();
+            setTimeout(robotTurn, 1000);
+        }
+
+        function robotTurn() {
+            if (!gameActive || isPlayerTurn) return;
+            
+            const difference = target - currentNumber;
+            let add = 1;
+            if (difference > 1) {
+                add = Math.floor(Math.random() * 3) + 1;
+            }
+            
+            currentNumber += add;
+            lastRobotAction = add;
+            document.getElementById('gameStatus').textContent = `机器人加了${add}`;
+            updateGameState();
+            
+            if (checkLoss()) {
+                gameOver(false);
+                return;
+            }
+            
+            isPlayerTurn = true;
+            document.getElementById('gameStatus').textContent = "玩家回合！";
+            document.getElementById('robotAction').textContent = `上一次机器人加了：${lastRobotAction}`;
+            updateButtonState();
+        }
+
+        function checkLoss() {
+            return currentNumber >= target;
+        }
+
+        function gameOver(isPlayer) {
+            gameActive = false;
+            updateButtonState();
+            document.getElementById('targetNumber').disabled = false;
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('gameStatus').textContent = isPlayer ? 
+                "玩家输了！游戏结束！" : "机器人输了！你赢了！";
+            document.getElementById('robotAction').textContent = "";
+        }
+
+        function updateGameState() {
+            document.getElementById('currentNumber').textContent = `当前数字：${currentNumber}`;
+            updateButtonState();
+        }
+
+        function updateButtonState() {
+            const difference = target - currentNumber;
+            const btn1 = document.getElementById('btn1');
+            const btn2 = document.getElementById('btn2');
+            const btn3 = document.getElementById('btn3');
+
+            if (!gameActive) {
+                btn1.disabled = true;
+                btn2.disabled = true;
+                btn3.disabled = true;
+                return;
+            }
+
+            if (isPlayerTurn) {
+                btn1.disabled = false;
+                btn2.disabled = difference <= 1;
+                btn3.disabled = difference <= 2;
+            } else {
+                btn1.disabled = true;
+                btn2.disabled = true;
+                btn3.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

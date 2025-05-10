@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>井字棋</title>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a8a5e6;
+            --background: #f8f9fa;
+            --text-color: #2d3436;
+            --board-bg: white;
+            --status-bg: white;
+            --cell-hover: #e3e7ff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #a66efa;
+                --secondary-color: #4a4458;
+                --background: #1a1a1a;
+                --text-color: #ffffff;
+                --board-bg: #2d2d2d;
+                --status-bg: #333333;
+                --cell-hover: #363636;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: var(--background);
+            color: var(--text-color);
+            padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .status {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2rem 0;
+            padding: 12px 24px;
+            background: var(--status-bg);
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: background 0.3s ease;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: var(--board-bg);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            touch-action: manipulation;
+            transition: background 0.3s ease;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            background: var(--background);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--primary-color);
+        }
+
+        .cell:hover {
+            background: var(--cell-hover);
+            transform: scale(0.98);
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+            padding: 14px 32px;
+            font-size: 1.1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(108,92,231,0.3);
+        }
+
+        @media (max-width: 480px) {
+            .cell {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+            
+            .status {
+                font-size: 1.2rem;
+                margin: 1.5rem 0;
+            }
+        }
+
+        @media (max-height: 500px) {
+            body {
+                padding: 10px;
+            }
+            
+            .board {
+                transform: scale(0.9);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">游戏初始化中...</div>
+    <div class="board" id="board"></div>
+    <button class="restart-btn" onclick="resetGame()">新游戏</button>
+
+    <script>
+        const AI_DELAY = 300;
+        const AI_THINKING_DELAY = 500;
+        let currentPlayer = 'X';
+        let gameBoard = Array(9).fill('');
+        let gameActive = true;
+        let isProcessing = false;
+
+        function randomizeFirstPlayer() {
+            const isPlayerFirst = Math.random() < 0.5;
+            currentPlayer = isPlayerFirst ? 'X' : 'O';
+            updateStatus();
+            
+            if (!isPlayerFirst) {
+                setTimeout(() => aiMove(), AI_THINKING_DELAY);
+            }
+        }
+
+        function initGame() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.setAttribute('data-index', i);
+                cell.addEventListener('click', handleCellClick);
+                board.appendChild(cell);
+            }
+            
+            randomizeFirstPlayer();
+        }
+
+        function handleCellClick(e) {
+            if (!gameActive || currentPlayer !== 'X' || isProcessing || gameBoard[+e.target.dataset.index]) return;
+
+            isProcessing = true;
+            const index = +e.target.dataset.index;
+            
+            makeMove(index, 'X');
+            
+            if (checkWin('X')) {
+                endGame('🎉 你赢了！');
+                isProcessing = false;
+                return;
+            }
+            
+            if (isBoardFull()) {
+                endGame('🤝 平局！');
+                isProcessing = false;
+                return;
+            }
+            
+            setTimeout(() => {
+                isProcessing = false;
+                aiMove();
+            }, AI_DELAY);
+        }
+
+        function aiMove() {
+            if (!gameActive || isProcessing) return;
+            
+            isProcessing = true;
+            
+            let move = findWinningMove('O') || 
+                      findWinningMove('X') || 
+                      centerFirst() || 
+                      randomMove();
+
+            if (typeof move !== 'number' || move < 0 || move > 8 || gameBoard[move]) {
+                move = randomMove();
+            }
+
+            makeMove(move, 'O');
+            
+            if (checkWin('O')) {
+                endGame('🤖 AI赢了！');
+            } else if (isBoardFull()) {
+                endGame('🤝 平局！');
+            }
+            
+            isProcessing = false;
+        }
+
+        function makeMove(index, player) {
+            gameBoard[index] = player;
+            document.querySelector(`[data-index="${index}"]`).textContent = player;
+            currentPlayer = player === 'X' ? 'O' : 'X';
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status');
+            status.textContent = currentPlayer === 'X' ? '你的回合 ✨' : 'AI思考中...';
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            document.getElementById('status').textContent = message;
+        }
+
+        function checkWin(player) {
+            const winPatterns = [
+                [0,1,2], [3,4,5], [6,7,8],
+                [0,3,6], [1,4,7], [2,5,8],
+                [0,4,8], [2,4,6]
+            ];
+            return winPatterns.some(pattern => 
+                pattern.every(i => gameBoard[i] === player)
+            );
+        }
+
+        function findWinningMove(player) {
+            for (let pattern of [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]) {
+                let [a,b,c] = pattern;
+                if (gameBoard[a] === player && gameBoard[b] === player && !gameBoard[c]) return c;
+                if (gameBoard[a] === player && gameBoard[c] === player && !gameBoard[b]) return b;
+                if (gameBoard[b] === player && gameBoard[c] === player && !gameBoard[a]) return a;
+            }
+            return null;
+        }
+
+        function centerFirst() {
+            return !gameBoard[4] ? 4 : null;
+        }
+
+        function randomMove() {
+            const emptyCells = gameBoard
+                .map((cell, idx) => !cell ? idx : null)
+                .filter(cell => cell !== null);
+            return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+
+        function isBoardFull() {
+            return gameBoard.every(cell => cell);
+        }
+
+        function resetGame() {
+            gameBoard = Array(9).fill('');
+            gameActive = true;
+            isProcessing = false;
+            document.querySelectorAll('.cell').forEach(cell => cell.textContent = '');
+            randomizeFirstPlayer();
+        }
+
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

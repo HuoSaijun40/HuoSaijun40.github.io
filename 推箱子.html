@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推箱子</title>
+    <style>
+        :root {
+            --bg-gradient-start: #f5f7fa;
+            --bg-gradient-end: #c3cfe2;
+            --game-container-bg: rgba(255,255,255,0.9);
+            --cell-bg: #fff;
+            --player-bg: #FFD700;
+            --box-bg: #FF6B6B;
+            --target-bg: #77DD77;
+            --control-bg: #4CAF50;
+            --text-color: #333;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-gradient-start: #2c3e50;
+                --bg-gradient-end: #3498db;
+                --game-container-bg: rgba(0,0,0,0.8);
+                --cell-bg: #2d3436;
+                --player-bg: #f1c40f;
+                --box-bg: #e74c3c;
+                --target-bg: #27ae60;
+                --control-bg: #2ecc71;
+                --text-color: #ecf0f1;
+            }
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--text-color);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 3px;
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--game-container-bg);
+            border-radius: 16px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            background: var(--cell-bg);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: var(--text-color);
+        }
+
+        .player {
+            background: var(--player-bg);
+            font-weight: bold;
+        }
+
+        .box {
+            background: var(--box-bg);
+            color: white;
+            font-weight: bold;
+        }
+
+        .target {
+            background: var(--target-bg);
+        }
+
+        .box-on-target {
+            background: var(--target-bg);
+            color: white;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left center right"
+                ". down .";
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 10px;
+            padding: 20px;
+            background: var(--game-container-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .controls button {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            background: var(--control-bg);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+        }
+
+        .controls .up {
+            grid-area: up;
+        }
+
+        .controls .left {
+            grid-area: left;
+        }
+
+        .controls .center {
+            grid-area: center;
+            background: transparent;
+            border: 2px solid var(--control-bg);
+            border-radius: 50%;
+        }
+
+        .controls .down {
+            grid-area: down;
+        }
+
+        .controls .right {
+            grid-area: right;
+        }
+
+        .controls button:active {
+            transform: scale(0.95);
+            filter: brightness(0.9);
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+            .cell {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            .controls button {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="game-container"></div>
+    <div class="controls">
+        <button class="up" onclick="movePlayer(0, -1)">↑</button>
+        <button class="left" onclick="movePlayer(-1, 0)">←</button>
+        <button class="center"></button>
+        <button class="down" onclick="movePlayer(0, 1)">↓</button>
+        <button class="right" onclick="movePlayer(1, 0)">→</button>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        let map = [];
+        let player = { x: 0, y: 0 };
+        let boxes = [];
+        let targets = [];
+
+        function initGame() {
+            generateRandomMap();
+            renderMap();
+        }
+
+        function generateRandomMap() {
+            map = Array.from({ length: 8 }, () => Array(8).fill(0));
+            boxes = [];
+            targets = [];
+            let obstacleCount = 0;
+            while (obstacleCount < 6) {
+                const x = Math.floor(Math.random() * 6) + 1;
+                const y = Math.floor(Math.random() * 6) + 1;
+                if (map[y][x] === 0) {
+                    map[y][x] = 1;
+                    obstacleCount++;
+                }
+            }
+            player.x = Math.floor(Math.random() * 6) + 1;
+            player.y = Math.floor(Math.random() * 6) + 1;
+            map[player.y][player.x] = 0;
+            const numBoxes = 3;
+            for (let i = 0; i < numBoxes; i++) {
+                let targetX, targetY;
+                do {
+                    targetX = Math.floor(Math.random() * 6) + 1;
+                    targetY = Math.floor(Math.random() * 6) + 1;
+                } while (map[targetY][targetX] !== 0 || (targetX === player.x && targetY === player.y) || isPositionOccupied(targetX, targetY, targets) || isTargetBlocked(targetX, targetY));
+                targets.push({ x: targetX, y: targetY });
+            }
+            for (let i = 0; i < numBoxes; i++) {
+                let boxX, boxY;
+                do {
+                    boxX = Math.floor(Math.random() * 6) + 1;
+                    boxY = Math.floor(Math.random() * 6) + 1;
+                } while (map[boxY][boxX] !== 0 || (boxX === player.x && boxY === player.y) || isBoxSurrounded(boxX, boxY) || isBoxOnTarget(boxX, boxY) || isBoxTwoSidesBlocked(boxX, boxY) || isPositionOccupied(boxX, boxY, boxes));
+                boxes.push({ x: boxX, y: boxY });
+            }
+        }
+
+        function isPositionOccupied(x, y, positions) {
+            return positions.some(pos => pos.x === x && pos.y === y);
+        }
+
+        function isTargetBlocked(x, y) {
+            const directions = [ { dx: -1, dy: 0 }, { dx: 1, dy: 0 }, { dx: 0, dy: -1 }, { dx: 0, dy: 1 } ];
+            let count = 0;
+            for (const dir of directions) {
+                const newX = x + dir.dx;
+                const newY = y + dir.dy;
+                if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1) count++;
+            }
+            return count > 1;
+        }
+
+        function isBoxSurrounded(x, y) {
+            const directions = [ { dx: -1, dy: 0 }, { dx: 1, dy: 0 }, { dx: 0, dy: -1 }, { dx: 0, dy: 1 } ];
+            let count = 0;
+            for (const dir of directions) {
+                const newX = x + dir.dx;
+                const newY = y + dir.dy;
+                if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1 || boxes.some(box => box.x === newX && box.y === newY)) count++;
+            }
+            return count >= 3;
+        }
+
+        function isBoxOnTarget(x, y) {
+            return targets.some(target => target.x === x && target.y === y);
+        }
+
+        function isBoxTwoSidesBlocked(x, y) {
+            const directions = [ { dx: -1, dy: 0 }, { dx: 1, dy: 0 }, { dx: 0, dy: -1 }, { dx: 0, dy: 1 } ];
+            let count = 0;
+            for (const dir of directions) {
+                const newX = x + dir.dx;
+                const newY = y + dir.dy;
+                if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1) count++;
+            }
+            return count >= 2;
+        }
+
+        function renderMap() {
+            gameContainer.innerHTML = '';
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    if (map[y][x] === 1) cell.style.backgroundColor = '#a0a0a0';
+                    if (player.x === x && player.y === y) {
+                        cell.classList.add('player');
+                        cell.textContent = 'P';
+                    }
+                    boxes.forEach(box => {
+                        if (box.x === x && box.y === y) {
+                            cell.classList.add('box');
+                            cell.textContent = 'B';
+                        }
+                    });
+                    targets.forEach(target => {
+                        if (target.x === x && target.y === y) cell.classList.add('target');
+                    });
+                    gameContainer.appendChild(cell);
+                }
+            }
+        }
+
+        function checkWin() {
+            return boxes.every(box => targets.some(target => target.x === box.x && target.y === box.y));
+        }
+
+        function movePlayer(dx, dy) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+            if (newX < 0 || newX >= 8 || newY < 0 || newY >= 8 || map[newY][newX] === 1) return;
+            const boxIndex = boxes.findIndex(box => box.x === newX && box.y === newY);
+            if (boxIndex !== -1) {
+                const newBoxX = newX + dx;
+                const newBoxY = newY + dy;
+                if (newBoxX < 0 || newBoxX >= 8 || newBoxY < 0 || newBoxY >= 8 || map[newBoxY][newBoxX] === 1) return;
+                if (boxes.some(box => box.x === newBoxX && box.y === newBoxY)) return;
+                boxes[boxIndex].x = newBoxX;
+                boxes[boxIndex].y = newBoxY;
+            }
+            player.x = newX;
+            player.y = newY;
+            renderMap();
+            if (checkWin()) {
+                alert('恭喜你，胜利了！进入下一关！');
+                initGame();
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
