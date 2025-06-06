@@ -3,127 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>我的主页</title>
+    <title>活塞的主页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #e6f2ff;
-            --card-bg-color: white;
-            --text-color: #333;
-            --secondary-text-color: #666;
-            --button-gradient: linear-gradient(to bottom, #00b4ff, #007bff);
-            --button-hover-gradient: linear-gradient(to bottom, #0094ff, #0056b3);
-            --shadow-color: rgba(0, 0, 0, 0.05);
-            --hover-shadow-color: rgba(0, 0, 0, 0.15);
-            --toggle-bg: #ccc;
-            --toggle-bg-active: #007bff;
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-primary: #1e1e2c;
+            --text-secondary: #4a4a6a;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --border-radius: 16px;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --gradient-hover: linear-gradient(135deg, #5671f8, #4a4ad9);
         }
 
         [data-theme="dark"] {
-            --bg-color: #1f2937;
-            --card-bg-color: #2d3748;
-            --text-color: #ffffff;
-            --secondary-text-color: #cbd5e1;
-            --button-gradient: linear-gradient(to bottom, #3b82f6, #1d4ed8);
-            --button-hover-gradient: linear-gradient(to bottom, #2563eb, #1e40af);
-            --shadow-color: rgba(0, 0, 0, 0.2);
-            --hover-shadow-color: rgba(0, 0, 0, 0.3);
-            --toggle-bg: #6b7280;
-            --toggle-bg-active: #3b82f6;
+            --primary: #4895ef;
+            --secondary: #4361ee;
+            --card-bg: rgba(30, 30, 44, 0.92);
+            --text-primary: #f5f7ff;
+            --text-secondary: #c2c6e8;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            --hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --gradient-hover: linear-gradient(135deg, #5ca5ff, #5671f8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
         }
 
         body {
-            transition: background-color 0.5s ease, color 0.5s ease;
-        }
-
-        .section {
-            transition: background-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-        
-        header {
-            margin-bottom: 40px;
-        }
-        
-        h1 {
-            color: var(--text-color);
-            font-size: 2.5rem;
-            margin: 0;
-        }
-        
-        p {
-            color: var(--secondary-text-color);
-            max-width: 800px;
-            margin-top: 10px;
+            font-family: 'Poppins', 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f0f5ff, #e6f2ff);
+            color: var(--text-primary);
             line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            transition: var(--transition);
         }
-        
+
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             padding: 0 15px;
         }
-        
-        .sections-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            justify-content: flex-start;
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            margin: 20px 0 50px;
+            position: relative;
+            animation: fadeInDown 0.8s ease-out;
         }
-        
-        .section {
-            background-color: var(--card-bg-color);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 5px 15px var(--shadow-color);
-            flex: 1;
-            min-width: 300px;
-            max-width: calc(50% - 60px);
-        }
-        
-        .section-title {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: var(--text-color);
-        }
-        
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .button {
+
+        h1 {
+            font-size: 2.8rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            position: relative;
             display: inline-block;
-            padding: 12px 25px;
-            background-image: var(--button-gradient);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
         }
-        
-        .button:hover {
-            background-image: var(--button-hover-gradient);
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 25px auto 0;
+            font-weight: 300;
+        }
+
+        /* Fixed Theme Toggle */
+        .theme-toggle-fixed {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-bg);
+            padding: 12px 18px;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .theme-toggle-fixed {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .theme-toggle-fixed:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px var(--hover-shadow-color);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .theme-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 1rem;
         }
 
         .theme-toggle {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
-            margin-top: 20px;
+            width: 50px;
+            height: 26px;
         }
 
         .theme-toggle input {
@@ -139,57 +158,212 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--toggle-bg);
+            background: linear-gradient(to right, #6c757d, #495057);
             transition: .4s;
             border-radius: 34px;
-            outline: none !important;
+        }
+
+        [data-theme="dark"] .slider {
+            background: linear-gradient(to right, #4361ee, #3a0ca3);
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--toggle-bg-active);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         input:checked + .slider:before {
-            transform: translateX(26px);
+            transform: translateX(24px);
         }
 
-        * {
-            outline: none !important;
+        /* Sections Grid */
+        .sections-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        /* Card Styles */
+        .section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: backwards;
+        }
+
+        .section:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            z-index: 2;
+        }
+
+        .section-title {
+            font-size: 1.7rem;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            background: var(--gradient);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        /* Button Styles */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 28px;
+            background: var(--gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            gap: 8px;
+        }
+
+        .button i {
+            font-size: 1.1rem;
+        }
+
+        .button:hover {
+            background: var(--gradient-hover);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        /* Runtime Styles */
+        .runtime-container {
+            background: var(--gradient);
+            padding: 18px 25px;
+            border-radius: 14px;
+            color: white;
+            font-weight: 500;
+            font-size: 1.2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            display: inline-block;
+            width: 100%;
+        }
+
+        #runtime {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sections-container {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
         }
 
         @media (max-width: 768px) {
             header {
-                text-align: center;
+                margin: 30px 0 40px;
             }
             
             h1 {
-                font-size: 2rem;
+                font-size: 2.4rem;
             }
             
-            p {
-                margin: 10px auto 0;
-            }
-            
-            .sections-container {
-                justify-content: center;
+            .subtitle {
+                font-size: 1.1rem;
             }
             
             .section {
-                flex: 0 0 calc(100% - 140px);
-                max-width: calc(100% - 140px);
-                padding: 20px;
+                padding: 25px;
             }
             
             .section-title {
@@ -198,197 +372,306 @@
             
             .button {
                 padding: 10px 20px;
-                font-size: 0.9rem;
+                font-size: 0.95rem;
+            }
+
+            .theme-toggle-fixed {
+                top: 15px;
+                right: 15px;
+                padding: 10px 15px;
             }
         }
-        
+
         @media (max-width: 480px) {
-            .section {
-                flex: 0 0 calc(100% - 100px);
-                max-width: calc(100% - 100px);
-                padding: 20px;
-            }
-            
-            .button {
-                padding: 8px 16px;
-                font-size: 0.8rem;
-            }
-            
-            .section-title {
-                font-size: 1.3rem;
+            body {
+                padding: 15px;
             }
             
             h1 {
-                font-size: 1.8rem;
+                font-size: 2rem;
             }
-        }
+            
+            .sections-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 1.4rem;
+            }
+            
+            .button {
+                width: 100%;
+            }
+            
+            .theme-toggle-fixed {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+            }
 
-        .button, .slider {
-            transition: all 0.3s ease;
-        }
-
-        .button:hover, .slider:hover {
-            transform: translateY(-2px);
+            .theme-label {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Fixed Theme Toggle -->
+    <div class="theme-toggle-fixed">
+        <span class="theme-label">主题</span>
+        <label class="theme-toggle">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+    
     <header>
         <h1>活塞的主页</h1>
-        <p>欢迎访问我的个人主页，这里有一些有趣的内容和资源分享</p>
+        <p class="subtitle">欢迎访问我的个人主页，这里汇集了各种有趣的内容、实用工具和资源分享</p>
     </header>
     
     <div class="container">
         <div class="sections-container">
-            <div class="section">
-                <h2 class="section-title">网页更新公告</h2>
-                <p>1、加入了五子棋小游戏</p>
-                <p>2、加入了网页更新公告</p>
+            <div class="section" style="animation-delay: 0.1s">
+                <h2 class="section-title"><i class="fas fa-bullhorn"></i> 网页更新公告</h2>
+                <p><i class="fas fa-chevron-right"></i> 加入了像素画转换工具</p>
             </div>
             
-            <div class="section">
-                <h2 class="section-title">网站稳如老狗的运行了</h2>
-                <p id="runtime">正在计算网站运行时间...</p>
-            </div>
-            
-            <div class="section">
-                <h2 class="section-title">我所在的平台</h2>
-                <div class="button-group">
-                    <a href="https://v.douyin.com/MZegERlp0lQ/" class="button" target="_blank">抖音主页</a>
+            <div class="section" style="animation-delay: 0.2s">
+                <h2 class="section-title"><i class="fas fa-clock"></i> 网站运行时间</h2>
+                <div class="runtime-container">
+                    <p>网站稳如老狗的运行了</p>
+                    <p id="runtime">正在计算网站运行时间...</p>
                 </div>
             </div>
             
-            <div class="section">
-                <h2 class="section-title">小游戏</h2>
+            <div class="section" style="animation-delay: 0.3s">
+                <h2 class="section-title"><i class="fas fa-user-circle"></i> 我所在的平台</h2>
                 <div class="button-group">
-                    <a href="https://huosaijun40.github.io/推箱子.html" class="button" target="_blank">推箱子</a>
-                    <a href="https://huosaijun40.github.io/贪吃蛇.html" class="button" target="_blank">贪吃蛇</a>
-                    <a href="https://huosaijun40.github.io/数字游戏.html" class="button" target="_blank">数字游戏</a>
-                    <a href="https://huosaijun40.github.io/井字棋.html" class="button" target="_blank">井字棋</a>
-                    <a href="https://huosaijun40.github.io/扫雷.html" class="button" target="_blank">扫雷</a>
-                    <a href="https://huosaijun40.github.io/五子棋.html" class="button" target="_blank">五子棋</a>
-                    <a href="http://www.staggeringbeauty.com/" class="button" target="_blank">飘动的鳗鱼</a>
+                    <a href="https://v.douyin.com/MZegERlp0lQ/" class="button" target="_blank">
+                        <i class="fab fa-tiktok"></i> 抖音主页
+                    </a>
                 </div>
             </div>
             
-            <div class="section">
-                <h2 class="section-title">小工具</h2>
+            <div class="section" style="animation-delay: 0.4s">
+                <h2 class="section-title"><i class="fas fa-gamepad"></i> 小游戏</h2>
                 <div class="button-group">
-                    <a href="https://huosaijun40.github.io/HTML代码运行器.html" class="button" target="_blank">HTML代码运行器</a>
-                    <a href="https://huosaijun40.github.io/字数计算器.html" class="button" target="_blank">字数计算器</a>
-                    <a href="https://huosaijun40.github.io/北京时间.html" class="button" target="_blank">北京时间</a>
-                    <a href="https://huosaijun40.github.io/文本转二维码.html" class="button" target="_blank">文本转二维码</a>
-                    <a href="https://huosaijun40.github.io/文本与二进制转换器.html" class="button" target="_blank">文本与二进制转换</a>
-                    <a href="https://huosaijun40.github.io/音频变速工具.html" class="button" target="_blank">音频变速工具</a>
-                    <a href="https://huosaijun40.github.io/浏览器彩蛋.html" class="button" target="_blank">浏览器彩蛋</a>
-                    <a href="https://huosaijun40.github.io/视频转字符动画.html" class="button" target="_blank">视频转字符动画</a>
-                    <a href="https://huosaijun40.github.io/文件名批量提取器.html" class="button" target="_blank">文件名批量提取器</a>
-                </div>
-                <div style="margin-top: 20px; text-align: center;">
-                    <label class="theme-toggle">
-                        <input type="checkbox" id="theme-toggle">
-                        <span class="slider"></span>
-                    </label>
-                    <p style="margin-top: 5px; font-size: 0.9rem;">切换主题</p>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2 class="section-title">我的世界手机基岩版下载</h2>
-                <div class="button-group">
-                    <a href="https://mcapks.net/" class="button" target="_blank">我的世界基岩版下载</a>
+                    <a href="https://huosaijun40.github.io/推箱子.html" class="button" target="_blank">
+                        <i class="fas fa-box"></i> 推箱子
+                    </a>
+                    <a href="https://huosaijun40.github.io/贪吃蛇.html" class="button" target="_blank">
+                        <i class="fas fa-worm"></i> 贪吃蛇
+                    </a>
+                    <a href="https://huosaijun40.github.io/数字游戏.html" class="button" target="_blank">
+                        <i class="fas fa-sort-numeric-up"></i> 数字游戏
+                    </a>
+                    <a href="https://huosaijun40.github.io/井字棋.html" class="button" target="_blank">
+                        <i class="fas fa-times"></i> 井字棋
+                    </a>
+                    <a href="https://huosaijun40.github.io/扫雷.html" class="button" target="_blank">
+                        <i class="fas fa-bomb"></i> 扫雷
+                    </a>
+                    <a href="https://huosaijun40.github.io/五子棋.html" class="button" target="_blank">
+                        <i class="fas fa-chess-board"></i> 五子棋
+                    </a>
+                    <a href="http://www.staggeringbeauty.com/" class="button" target="_blank">
+                        <i class="fas fa-fish"></i> 飘动的鳗鱼
+                    </a>
                 </div>
             </div>
             
-            <div class="section">
-                <h2 class="section-title">我的世界电脑Java版启动器下载</h2>
+            <div class="section" style="animation-delay: 0.5s">
+                <h2 class="section-title"><i class="fas fa-tools"></i> 小工具</h2>
                 <div class="button-group">
-                    <a href="https://hmcl.huangyuhui.net/download/" class="button" target="_blank">HMCL启动器下载</a>
-                    <a href="https://afdian.com/a/LTCat" class="button" target="_blank">PCL2启动器下载</a>
-                    <a href="https://www.labymod.net/en/download" class="button" target="_blank">LabyMod启动器下载</a>
+                    <a href="https://huosaijun40.github.io/HTML代码运行器.html" class="button" target="_blank">
+                        <i class="fab fa-html5"></i> HTML运行器
+                    </a>
+                    <a href="https://huosaijun40.github.io/字数计算器.html" class="button" target="_blank">
+                        <i class="fas fa-calculator"></i> 字数计算器
+                    </a>
+                    <a href="https://huosaijun40.github.io/北京时间.html" class="button" target="_blank">
+                        <i class="fas fa-clock"></i> 北京时间
+                    </a>
+                    <a href="https://huosaijun40.github.io/文本转二维码.html" class="button" target="_blank">
+                        <i class="fas fa-qrcode"></i> 文本转二维码
+                    </a>
+                    <a href="https://huosaijun40.github.io/文本与二进制转换器.html" class="button" target="_blank">
+                        <i class="fas fa-exchange-alt"></i> 文本与二进制转换
+                    </a>
+                    <a href="https://huosaijun40.github.io/音频变速工具.html" class="button" target="_blank">
+                        <i class="fas fa-music"></i> 音频变速工具
+                    </a>
+                    <a href="https://huosaijun40.github.io/浏览器彩蛋.html" class="button" target="_blank">
+                        <i class="fas fa-egg"></i> 浏览器彩蛋
+                    </a>
+                    <a href="https://huosaijun40.github.io/视频转字符动画.html" class="button" target="_blank">
+                        <i class="fas fa-video"></i> 视频转字符动画
+                    </a>
+                    <a href="https://huosaijun40.github.io/文件名批量提取器.html" class="button" target="_blank">
+                        <i class="fas fa-file"></i> 文件名批量提取器
+                    </a>
+                     <a href="https://huosaijun40.github.io/像素画转换工具.html" class="button" target="_blank">
+                        <i class="fas fa-paint-brush"></i> 像素画转换工具
+                    </a>
                 </div>
             </div>
             
-            <div class="section">
-                <h2 class="section-title">我的世界手机Java版启动器下载</h2>
+            <div class="section" style="animation-delay: 0.6s">
+                <h2 class="section-title"><i class="fas fa-mobile-alt"></i> 我的世界手机基岩版下载</h2>
                 <div class="button-group">
-                    <a href="https://github.com/HMCL-dev/HMCL-PE/releases" class="button" target="_blank">HMCL-PE启动器下载</a>
-                    <a href="https://github.com/FCL-Team/FoldCraftLauncher/tags" class="button" target="_blank">FCL启动器下载</a>
-                    <a href="https://github.com/PojavLauncherTeam/PojavLauncher/releases" class="button" target="_blank">Pojav启动器下载</a>
+                    <a href="https://mcapks.net/" class="button" target="_blank">
+                        <i class="fas fa-download"></i> 基岩版下载
+                    </a>
                 </div>
             </div>
             
-            <div class="section">
-                <h2 class="section-title">我的世界实用网站</h2>
+            <div class="section" style="animation-delay: 0.7s">
+                <h2 class="section-title"><i class="fas fa-laptop"></i> 我的世界电脑Java版启动器下载</h2>
                 <div class="button-group">
-                    <a href="https://www.mcmod.cn" class="button" target="_blank">mc百科</a>
-                    <a href="https://www.minebbs.com" class="button" target="_blank">mineBBS论坛</a>
-                    <a href="https://klpbbs.com" class="button" target="_blank">苦力怕论坛</a>
-                    <a href="https://www.mcnav.net" class="button" target="_blank">mc导航网</a>
-                    <a href="https://www.minecraft.net/zh-hans" class="button" target="_blank">国际我的世界官网</a>
-                    <a href="https://mc.163.com" class="button" target="_blank">网易我的世界官网</a>
+                    <a href="https://hmcl.huangyuhui.net/download/" class="button" target="_blank">
+                        <i class="fas fa-download"></i> HMCL启动器
+                    </a>
+                    <a href="https://afdian.com/a/LTCat" class="button" target="_blank">
+                        <i class="fas fa-download"></i> PCL2启动器
+                    </a>
+                    <a href="https://www.labymod.net/en/download" class="button" target="_blank">
+                        <i class="fas fa-download"></i> LabyMod启动器
+                    </a>
                 </div>
             </div>
             
-            <div class="section">
-                <h2 class="section-title">资源分享</h2>
+            <div class="section" style="animation-delay: 0.8s">
+                <h2 class="section-title"><i class="fas fa-mobile"></i> 我的世界手机Java版启动器下载</h2>
                 <div class="button-group">
-                    <a href="https://www.123912.com/s/vHncVv-COcNd" class="button" target="_blank">音乐资源分享</a>
+                    <a href="https://github.com/HMCL-dev/HMCL-PE/releases" class="button" target="_blank">
+                        <i class="fas fa-download"></i> HMCL-PE
+                    </a>
+                    <a href="https://github.com/FCL-Team/FoldCraftLauncher/tags" class="button" target="_blank">
+                        <i class="fas fa-download"></i> FCL启动器
+                    </a>
+                    <a href="https://github.com/PojavLauncherTeam/PojavLauncher/releases" class="button" target="_blank">
+                        <i class="fas fa-download"></i> Pojav启动器
+                    </a>
+                </div>
+            </div>
+            
+            <div class="section" style="animation-delay: 0.9s">
+                <h2 class="section-title"><i class="fas fa-globe"></i> 我的世界实用网站</h2>
+                <div class="button-group">
+                    <a href="https://www.mcmod.cn" class="button" target="_blank">
+                        <i class="fas fa-book"></i> mc百科
+                    </a>
+                    <a href="https://www.minebbs.com" class="button" target="_blank">
+                        <i class="fas fa-users"></i> mineBBS论坛
+                    </a>
+                    <a href="https://klpbbs.com" class="button" target="_blank">
+                        <i class="fas fa-comments"></i> 苦力怕论坛
+                    </a>
+                    <a href="https://www.mcnav.net" class="button" target="_blank">
+                        <i class="fas fa-compass"></i> mc导航网
+                    </a>
+                    <a href="https://www.minecraft.net/zh-hans" class="button" target="_blank">
+                        <i class="fas fa-gamepad"></i> 国际官网
+                    </a>
+                    <a href="https://mc.163.com" class="button" target="_blank">
+                        <i class="fas fa-gamepad"></i> 网易官网
+                    </a>
+                </div>
+            </div>
+            
+            <div class="section" style="animation-delay: 1.0s">
+                <h2 class="section-title"><i class="fas fa-music"></i> 资源分享</h2>
+                <div class="button-group">
+                    <a href="https://www.123912.com/s/vHncVv-COcNd" class="button" target="_blank">
+                        <i class="fas fa-headphones"></i> 音乐资源下载
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
+    <footer>
+        <p>© 2025 活塞的主页 | 设计焕新版 | 让网络世界更美好</p>
+    </footer>
+
     <script>
+        // Set theme based on system preference
         function setThemeBasedOnSystem() {
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-toggle').checked = true;
             } else {
                 document.documentElement.removeAttribute('data-theme');
+                document.getElementById('theme-toggle').checked = false;
             }
         }
 
+        // Toggle theme function
         function toggleTheme() {
             if (document.documentElement.getAttribute('data-theme') === 'dark') {
                 document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
             } else {
                 document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
             }
         }
 
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-toggle').checked = true;
+        } else if (savedTheme === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+            document.getElementById('theme-toggle').checked = false;
+        } else {
+            setThemeBasedOnSystem();
+        }
+
+        // Listen for system theme changes
         if (window.matchMedia) {
             const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            colorSchemeQuery.addEventListener('change', (e) => {
-                setThemeBasedOnSystem();
-            });
+            colorSchemeQuery.addEventListener('change', setThemeBasedOnSystem);
         }
 
+        // Update runtime function
         function updateRuntime() {
             const creationTime = new Date("2025-02-29T13:24:16+08:00");
-            const beijingTime = new Date();
-            beijingTime.setHours(beijingTime.getHours() + 8);
-            const runtime = beijingTime - creationTime;
+            const now = new Date();
+            const runtime = now - creationTime;
+            
+            const seconds = Math.floor(runtime / 1000) % 60;
+            const minutes = Math.floor(runtime / (1000 * 60)) % 60;
+            const hours = Math.floor(runtime / (1000 * 60 * 60)) % 24;
             const days = Math.floor(runtime / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((runtime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((runtime % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((runtime % (1000 * 60)) / 1000);
-            document.getElementById('runtime').textContent = ` ${days} 天 ${hours} 小时 ${minutes} 分钟 ${seconds} 秒`;
+            
+            document.getElementById('runtime').textContent = `${days} 天 ${hours} 小时 ${minutes} 分 ${seconds} 秒`;
         }
 
+        // Initialize on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-            setThemeBasedOnSystem();
             const themeToggle = document.getElementById('theme-toggle');
             themeToggle.addEventListener('change', toggleTheme);
-
-            if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                themeToggle.checked = true;
-            } else {
-                themeToggle.checked = false;
-            }
             
             updateRuntime();
-            
             setInterval(updateRuntime, 1000);
+            
+            // Add animation to elements when they come into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.animationPlayState = 'paused';
+                observer.observe(section);
+            });
         });
     </script>
 </body>
