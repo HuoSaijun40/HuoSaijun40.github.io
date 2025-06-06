@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>像素画转换工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: white;
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            max-width: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 100%;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .control-panel {
+            background: rgba(20, 20, 40, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .preview-area {
+            background: rgba(20, 20, 40, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ff7e5f;
+            display: inline-block;
+        }
+        
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 30px 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .upload-area:hover, .upload-area:active {
+            border-color: #ff7e5f;
+            background: rgba(255, 126, 95, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            color: #ff7e5f;
+        }
+        
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .upload-subtext {
+            opacity: 0.7;
+            font-size: 0.85rem;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        
+        .value-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 10px;
+            min-width: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ff7e5f;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 126, 95, 0.5);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            box-shadow: 0 3px 10px rgba(255, 126, 95, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 5px rgba(255, 126, 95, 0.4);
+        }
+        
+        #resetBtn {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        #resetBtn:active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        canvas {
+            max-width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 15px;
+        }
+        
+        .preview-placeholder {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+        }
+        
+        .preview-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .preview-controls {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        
+        .preview-controls button {
+            min-width: 100px;
+            padding: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .info-panel {
+            background: rgba(20, 20, 40, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-title {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: #feb47b;
+        }
+        
+        .tips {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .tip {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 3px solid #ff7e5f;
+        }
+        
+        .tip h3 {
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+            color: #feb47b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tip-icon {
+            width: 24px;
+            text-align: center;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            opacity: 0.7;
+            font-size: 0.85rem;
+        }
+        
+        .mobile-only {
+            display: none;
+        }
+        
+        @media (orientation: landscape) {
+            .preview-placeholder {
+                height: 200px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1200px;
+            }
+            
+            .main-content {
+                flex-direction: row;
+            }
+            
+            .control-panel {
+                flex: 1;
+                min-width: 300px;
+            }
+            
+            .preview-area {
+                flex: 2;
+                min-width: 400px;
+            }
+            
+            .tips {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .mobile-only {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 480px) and (max-width: 767px) {
+            .btn-group button {
+                min-width: calc(50% - 6px);
+            }
+            
+            .preview-controls button {
+                min-width: calc(33.33% - 7px);
+            }
+        }
+        
+        @media (max-width: 479px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.3rem;
+            }
+            
+            .upload-text {
+                font-size: 1rem;
+            }
+            
+            button {
+                min-width: 100%;
+                padding: 12px;
+            }
+            
+            .btn-group {
+                gap: 8px;
+            }
+            
+            .preview-controls {
+                gap: 8px;
+            }
+            
+            .preview-controls button {
+                min-width: calc(50% - 4px);
+            }
+            
+            .mobile-only {
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+                font-size: 0.9rem;
+                color: rgba(255, 255, 255, 0.7);
+            }
+        }
+        
+        button:active, .upload-area:active {
+            opacity: 0.9;
+        }
+        
+        .no-context-menu {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-paint-brush"></i> 像素画转换工具</h1>
+            <p class="subtitle">上传图片，将其转换为minecraft像素作品</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="control-panel">
+                <h2 class="panel-title"><i class="fas fa-sliders-h"></i> 控制面板</h2>
+                
+                <div class="upload-area" id="dropArea">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">点击或拖放图片到此处</div>
+                    <div class="upload-subtext">支持 JPG, PNG, GIF 格式 (最大 5MB)</div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label>
+                            <span><i class="fas fa-th-large"></i> 像素大小</span>
+                            <span class="value-display" id="pixelSizeValue">10</span>
+                        </label>
+                        <input type="range" id="pixelSize" min="2" max="40" value="10">
+                        <small>控制像素化程度，数值越大像素块越明显</small>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>
+                            <span><i class="fas fa-palette"></i> 色彩模式</span>
+                            <span class="value-display" id="colorModeValue">彩色</span>
+                        </label>
+                        <select id="colorMode" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; outline: none; width: 100%;">
+                            <option value="color">彩色模式</option>
+                            <option value="grayscale">黑白模式</option>
+                            <option value="sepia">复古棕褐色</option>
+                        </select>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="processBtn"><i class="fas fa-magic"></i> 生成像素画</button>
+                        <button id="resetBtn"><i class="fas fa-redo"></i> 重置</button>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="downloadBtn"><i class="fas fa-download"></i> 下载像素画</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview-area">
+                <h2 class="panel-title"><i class="fas fa-eye"></i> 预览效果</h2>
+                
+                <div class="preview-placeholder" id="previewPlaceholder">
+                    <i class="fas fa-image"></i>
+                    <p>上传图片后预览将显示在这里</p>
+                    <p class="mobile-only">提示：双指缩放可调整预览大小</p>
+                </div>
+                
+                <canvas id="previewCanvas" width="800" height="800" style="display: none;"></canvas>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2 class="info-title"><i class="fas fa-lightbulb"></i> 使用技巧</h2>
+            <div class="tips">
+                <div class="tip">
+                    <h3><span class="tip-icon"><i class="fas fa-image"></i></span> 选择合适的图像</h3>
+                    <p>轮廓清晰的图像（如插画、图标）转换效果最佳。避免使用细节过多的照片。</p>
+                </div>
+                <div class="tip">
+                    <h3><span class="tip-icon"><i class="fas fa-sliders-h"></i></span> 调整像素大小</h3>
+                    <p>较小的像素值保留更多细节，较大的像素值创造更明显的像素艺术效果。</p>
+                </div>
+                <div class="tip">
+                    <h3><span class="tip-icon"><i class="fas fa-adjust"></i></span> 尝试不同模式</h3>
+                    <p>黑白模式创造经典风格，棕褐色模式营造复古氛围，彩色模式保留原色。</p>
+                </div>
+                <div class="tip">
+                    <h3><span class="tip-icon"><i class="fas fa-share-alt"></i></span> 导出与分享</h3>
+                    <p>转换完成后，可下载PNG格式图像，用于游戏素材、社交媒体或打印。</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>像素画转换工具 &copy; 2023 | 将您的照片变成像素风图片</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('imageInput');
+            const dropArea = document.getElementById('dropArea');
+            const previewCanvas = document.getElementById('previewCanvas');
+            const previewCtx = previewCanvas.getContext('2d');
+            const previewPlaceholder = document.getElementById('previewPlaceholder');
+            const pixelSizeSlider = document.getElementById('pixelSize');
+            const pixelSizeValue = document.getElementById('pixelSizeValue');
+            const colorModeSelect = document.getElementById('colorMode');
+            const colorModeValue = document.getElementById('colorModeValue');
+            const processBtn = document.getElementById('processBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            let originalImage = null;
+            let pixelArtImage = null;
+            let currentScale = 1;
+            
+            pixelSizeSlider.addEventListener('input', function() {
+                pixelSizeValue.textContent = this.value;
+            });
+            
+            colorModeSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex].text;
+                colorModeValue.textContent = selectedOption;
+            });
+            
+            dropArea.addEventListener('click', function() {
+                imageInput.click();
+            });
+            
+            dropArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#ff7e5f';
+                this.style.backgroundColor = 'rgba(255, 126, 95, 0.1)';
+            });
+            
+            dropArea.addEventListener('dragleave', function() {
+                this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                this.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+            });
+            
+            dropArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                this.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                
+                if (e.dataTransfer.files.length) {
+                    handleImageUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            imageInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    handleImageUpload(this.files[0]);
+                }
+            });
+            
+            function handleImageUpload(file) {
+                if (!file.type.match('image.*')) {
+                    alert('请上传图片文件！');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('文件大小不能超过5MB！');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImage = img;
+                        pixelArtImage = null;
+                        previewPlaceholder.style.display = 'none';
+                        previewCanvas.style.display = 'block';
+                        currentScale = 1;
+                        drawImageScaled(img);
+                    };
+                    img.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            function drawImageScaled(img) {
+                previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                
+                const scale = Math.min(
+                    previewCanvas.width / img.width,
+                    previewCanvas.height / img.height
+                );
+                
+                const x = (previewCanvas.width - img.width * scale) / 2;
+                const y = (previewCanvas.height - img.height * scale) / 2;
+                
+                previewCtx.drawImage(img, 0, 0, img.width, img.height, 
+                                    x, y, img.width * scale, img.height * scale);
+            }
+            
+            function generatePixelArt() {
+                if (!originalImage) {
+                    alert('请先上传图片！');
+                    return;
+                }
+                
+                const pixelSize = parseInt(pixelSizeSlider.value);
+                const colorMode = colorModeSelect.value;
+                
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                tempCanvas.width = 800;
+                tempCanvas.height = 800;
+                
+                const scale = Math.min(
+                    tempCanvas.width / originalImage.width,
+                    tempCanvas.height / originalImage.height
+                );
+                
+                const x = (tempCanvas.width - originalImage.width * scale) / 2;
+                const y = (tempCanvas.height - originalImage.height * scale) / 2;
+                
+                tempCtx.drawImage(originalImage, 0, 0, originalImage.width, originalImage.height, 
+                                 x, y, originalImage.width * scale, originalImage.height * scale);
+                
+                const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                const data = imageData.data;
+                
+                for (let y = 0; y < tempCanvas.height; y += pixelSize) {
+                    for (let x = 0; x < tempCanvas.width; x += pixelSize) {
+                        let r = 0, g = 0, b = 0, count = 0;
+                        
+                        for (let dy = 0; dy < pixelSize && y + dy < tempCanvas.height; dy++) {
+                            for (let dx = 0; dx < pixelSize && x + dx < tempCanvas.width; dx++) {
+                                const index = ((y + dy) * tempCanvas.width + (x + dx)) * 4;
+                                r += data[index];
+                                g += data[index + 1];
+                                b += data[index + 2];
+                                count++;
+                            }
+                        }
+                        
+                        r = Math.floor(r / count);
+                        g = Math.floor(g / count);
+                        b = Math.floor(b / count);
+                        
+                        if (colorMode === 'grayscale') {
+                            const gray = 0.3 * r + 0.59 * g + 0.11 * b;
+                            r = g = b = gray;
+                        } else if (colorMode === 'sepia') {
+                            const tr = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+                            const tg = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+                            const tb = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+                            r = tr;
+                            g = tg;
+                            b = tb;
+                        }
+                        
+                        tempCtx.fillStyle = `rgb(${r},${g},${b})`;
+                        tempCtx.fillRect(x, y, pixelSize, pixelSize);
+                    }
+                }
+                
+                pixelArtImage = new Image();
+                pixelArtImage.onload = function() {
+                    drawImageScaled(pixelArtImage);
+                };
+                pixelArtImage.src = tempCanvas.toDataURL();
+            }
+            
+            processBtn.addEventListener('click', generatePixelArt);
+            
+            resetBtn.addEventListener('click', function() {
+                if (originalImage) {
+                    drawImageScaled(originalImage);
+                    pixelSizeSlider.value = 10;
+                    pixelSizeValue.textContent = '10';
+                    colorModeSelect.value = 'color';
+                    colorModeValue.textContent = '彩色';
+                    pixelArtImage = null;
+                }
+            });
+            
+            downloadBtn.addEventListener('click', function() {
+                if (!pixelArtImage) {
+                    alert('请先生成像素画！');
+                    return;
+                }
+                
+                const link = document.createElement('a');
+                link.download = 'pixel-art.png';
+                link.href = previewCanvas.toDataURL('image/png');
+                link.click();
+            });
+            
+            previewCanvas.addEventListener('touchstart', handleTouchStart, false);
+            previewCanvas.addEventListener('touchmove', handleTouchMove, false);
+            
+            let initialPinchDistance = null;
+            let initialScale = 1;
+            
+            function handleTouchStart(e) {
+                e.preventDefault();
+                if (e.touches.length === 2 && pixelArtImage) {
+                    initialPinchDistance = getDistance(
+                        e.touches[0].pageX, e.touches[0].pageY,
+                        e.touches[1].pageX, e.touches[1].pageY
+                    );
+                    initialScale = currentScale;
+                }
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+                if (e.touches.length === 2 && pixelArtImage) {
+                    const currentDistance = getDistance(
+                        e.touches[0].pageX, e.touches[0].pageY,
+                        e.touches[1].pageX, e.touches[1].pageY
+                    );
+                    
+                    if (initialPinchDistance !== null) {
+                        const scaleFactor = currentDistance / initialPinchDistance;
+                        currentScale = Math.max(0.5, Math.min(2, initialScale * scaleFactor));
+                        applyScale(pixelArtImage);
+                    }
+                }
+            }
+            
+            function getDistance(x1, y1, x2, y2) {
+                return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            }
+            
+            function applyScale(img) {
+                previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                
+                const scaledWidth = img.width * currentScale;
+                const scaledHeight = img.height * currentScale;
+                
+                const x = (previewCanvas.width - scaledWidth) / 2;
+                const y = (previewCanvas.height - scaledHeight) / 2;
+                
+                previewCtx.drawImage(img, x, y, scaledWidth, scaledHeight);
+            }
+        });
+    </script>
+</body>
+</html>
